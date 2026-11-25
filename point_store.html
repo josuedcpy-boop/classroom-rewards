@@ -1,0 +1,4205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12142a;
+    --bg-glow: radial-gradient(1200px 600px at 15% -10%, #232a5c 0%, transparent 60%),
+               radial-gradient(900px 500px at 100% 0%, #1c2f52 0%, transparent 55%);
+    --surface:#1c2044;
+    --surface-2:#242a54;
+    --stub:#171a37;
+    --line:#3a4080;
+    --gold:#f2b705;
+    --gold-dim:#a9830a;
+    --teal:#3fd0c9;
+    --text:#eef0fb;
+    --muted:#9099c4;
+    --danger:#ff6b6b;
+    --good:#54e0a8;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color:var(--bg);
+    background-image:var(--bg-glow);
+    color:var(--text);
+    font-family:'Manrope',system-ui,sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:24px;
+    padding-bottom:22px;
+    border-bottom:1px dashed var(--line);
+  }
+  .brand-eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size:clamp(34px,6vw,54px);
+    margin:0;
+    line-height:1;
+    letter-spacing:.5px;
+  }
+  h1 span{color:var(--gold);}
+  .sub{color:var(--muted);font-size:14px;margin-top:8px;max-width:520px;}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;align-items:center;
+  }
+  button{
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    border-radius:999px;
+    padding:10px 18px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text);
+    cursor:pointer;
+    transition:transform .12s ease, background .15s ease, border-color .15s ease;
+  }
+  button:hover{transform:translateY(-1px);border-color:var(--teal);}
+  button:active{transform:translateY(0);}
+  button.primary{background:var(--gold);border-color:var(--gold);color:#231a00;}
+  button.primary:hover{background:#ffcc22;}
+  button.teal{background:var(--teal);border-color:var(--teal);color:#04211f;}
+  button.teal:hover{background:#5fe6df;}
+  button.ghost{background:transparent;}
+  button.danger-ghost{color:var(--danger);border-color:rgba(255,107,107,.35);background:transparent;}
+  button:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .toolbar-spacer{flex:1;}
+  .save-flash{
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--good);
+    opacity:0;transition:opacity .3s ease;
+  }
+  .save-flash.show{opacity:1;}
+  #fileInput{display:none;}
+
+  /* ---------- Student roster ---------- */
+  .roster-section{margin-bottom:28px;}
+  .grade-filter{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .grade-pill{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;
+    letter-spacing:.04em;
+    background:transparent;border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;color:var(--muted);cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .grade-pill:hover{color:var(--text);border-color:var(--teal);}
+  .grade-pill.active{background:var(--teal);border-color:var(--teal);color:#04211f;}
+  .grade-pill.add-grade-pill{
+    border-style:dashed;color:var(--gold);border-color:var(--gold-dim);
+  }
+  .grade-pill.add-grade-pill:hover{border-color:var(--gold);color:var(--gold);background:rgba(242,183,5,.1);}
+  .grade-pill-group{display:inline-flex;align-items:center;gap:3px;}
+  .grade-icon-btn{
+    width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--muted);font-size:10px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;padding:0;flex-shrink:0;
+  }
+  .grade-icon-btn:hover{border-color:var(--teal);color:var(--teal);}
+  .roster-head{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+  }
+  .roster-title{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--text);
+    display:flex;align-items:center;gap:8px;
+  }
+  .roster-bar{
+    display:flex;flex-wrap:wrap;gap:10px;
+  }
+  .student-chip{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:9px 14px;
+    cursor:pointer;
+    position:relative;
+    transition:border-color .15s ease, background .15s ease;
+    min-width:150px;
+  }
+  .student-chip:hover{border-color:var(--teal);}
+  .student-chip.active{
+    border-color:var(--gold);
+    background:linear-gradient(180deg, rgba(242,183,5,.14), rgba(242,183,5,.04));
+  }
+  .student-chip.active::before{
+    content:"selected";
+    position:absolute;top:-9px;left:12px;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+    text-transform:uppercase;color:#231a00;background:var(--gold);
+    padding:1px 7px;border-radius:999px;
+  }
+  .chip-avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;
+    color:var(--teal);flex-shrink:0;
+  }
+  .chip-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .chip-name{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13.5px;
+    outline:none;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;
+  }
+  .chip-balance{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);
+    display:flex;align-items:center;gap:4px;
+  }
+  .chip-balance.debt{color:var(--danger);}
+  .chip-balance [contenteditable]{outline:none;border-radius:4px;min-width:12px;}
+  .chip-grade-badge{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);
+    background:rgba(63,208,201,.12);border-radius:999px;padding:2px 8px;
+    align-self:flex-start;margin-top:2px;
+  }
+  .chip-grade-select{
+    margin-top:3px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10.5px;
+    padding:3px 6px;outline:none;cursor:pointer;
+  }
+  .chip-grade-select:focus{border-color:var(--teal);}
+  .chip-del{
+    position:absolute;top:-8px;right:-8px;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--danger);color:#2a0000;border:none;
+    font-size:11px;display:none;align-items:center;justify-content:center;cursor:pointer;padding:0;
+  }
+  body.students-edit-mode .chip-del{display:flex;}
+  .add-chip{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    border:2px dashed var(--line);border-radius:14px;padding:9px 16px;
+    color:var(--muted);cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;
+    display:none;
+  }
+  body.students-edit-mode .add-chip{display:flex;}
+  .add-chip:hover{border-color:var(--teal);color:var(--teal);}
+
+  .gift-btn{
+    flex-shrink:0;
+    width:28px;height:28px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--gold);
+    font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition:border-color .15s ease, transform .12s ease;
+  }
+  .gift-btn:hover{border-color:var(--gold);transform:translateY(-1px);}
+
+  .empty-roster{
+    color:var(--muted);font-size:13px;font-family:'Manrope',sans-serif;
+    border:1px dashed var(--line);border-radius:14px;padding:14px 16px;
+  }
+
+  /* ---------- Active shopper banner ---------- */
+  .shopper-banner{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 20px;margin-bottom:26px;
+  }
+  .shopper-banner .who{
+    font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;
+    display:flex;align-items:center;gap:10px;
+  }
+  .shopper-banner .who .name{color:var(--gold);}
+  .shopper-banner .bal{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:20px;color:var(--gold);
+    display:flex;align-items:center;gap:6px;
+  }
+  .shopper-banner .bal.debt{color:var(--danger);}
+  .shopper-banner.none{color:var(--muted);font-family:'Manrope',sans-serif;font-size:13.5px;}
+
+  /* ---------- Grid of tickets ---------- */
+  .section-title{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;margin:0 0 14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:18px;
+    margin-bottom:36px;
+  }
+
+  .ticket{
+    display:flex;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 12px 26px -16px rgba(0,0,0,.7);
+    transition:border-color .15s ease;
+  }
+  .ticket:hover{border-color:var(--teal);}
+  .ticket.unaffordable .price-value{color:#7d6a2a;}
+
+  .ticket-main{
+    flex:1;
+    padding:18px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:0;
+  }
+  .item-name{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:16.5px;
+    line-height:1.25;
+    color:var(--text);
+    outline:none;
+    border-radius:6px;
+    padding:2px 4px;
+    margin:-2px -4px;
+  }
+  .item-note{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.4;
+    outline:none;
+    border-radius:6px;
+    padding:2px 4px;
+    margin:-2px -4px;
+    font-style:italic;
+  }
+  .item-note:empty::before{
+    content:"add a footnote (optional)";
+    color:#565d8f;
+    font-style:italic;
+  }
+  [contenteditable]:focus{background:var(--surface-2);}
+  .owned-tag{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal);
+    background:rgba(63,208,201,.12);border-radius:999px;padding:3px 9px;
+    align-self:flex-start;
+  }
+
+  .perforation{
+    width:0;
+    position:relative;
+    border-left:2px dashed var(--line);
+    margin:10px 0;
+  }
+  .perforation::before,.perforation::after{
+    content:"";
+    position:absolute;
+    width:16px;height:16px;
+    background-color:var(--bg);
+    border-radius:50%;
+    left:-9px;
+  }
+  .perforation::before{top:-18px;}
+  .perforation::after{bottom:-18px;}
+
+  .ticket-stub{
+    width:128px;
+    flex-shrink:0;
+    background:var(--stub);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding:14px 8px;
+    position:relative;
+  }
+  .stub-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .price-value{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:18px;
+    color:var(--gold);
+    outline:none;
+    text-align:center;
+    width:100%;
+    background:transparent;
+    border:none;
+    border-radius:6px;
+  }
+  .price-value:focus{background:var(--surface-2);}
+  .price-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dim);}
+
+  .buy-btn{
+    margin-top:6px;
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    border-radius:999px;
+    padding:6px 14px;
+    border:1px solid var(--gold);
+    background:var(--gold);
+    color:#231a00;
+    cursor:pointer;
+  }
+  .buy-btn:hover{background:#ffcc22;}
+  .buy-btn:disabled{
+    background:transparent;color:var(--muted);border-color:var(--line);cursor:not-allowed;
+  }
+
+  .del-btn{
+    position:absolute;
+    top:6px;right:6px;
+    width:22px;height:22px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--muted);
+    font-size:13px;
+    line-height:1;
+    display:none;
+    align-items:center;justify-content:center;
+    cursor:pointer;
+    padding:0;
+    z-index:2;
+  }
+  body.edit-mode .del-btn{display:flex;}
+  .del-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+  body.edit-mode .item-name,
+  body.edit-mode .item-note,
+  body.edit-mode .price-value{cursor:text;}
+
+  .add-ticket{
+    border:2px dashed var(--line);
+    border-radius:var(--radius);
+    background:transparent;
+    color:var(--muted);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:6px;
+    min-height:118px;
+    cursor:pointer;
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:14px;
+  }
+  body.edit-mode .add-ticket{display:flex;}
+  .add-ticket:hover{border-color:var(--teal);color:var(--teal);}
+  .add-ticket .plus{font-size:26px;line-height:1;}
+
+  /* ---------- Inventory ---------- */
+  .inventory-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:14px;
+  }
+  .inv-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .inv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .inv-name{font-family:'Fredoka',sans-serif;font-weight:600;font-size:14.5px;line-height:1.3;}
+  .inv-qty{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--teal);
+    background:rgba(63,208,201,.12);border-radius:999px;padding:3px 10px;flex-shrink:0;
+  }
+  .inv-actions{display:flex;gap:8px;}
+  .inv-actions button{
+    font-size:11.5px;padding:6px 12px;
+  }
+  .empty-inv{
+    color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:14px;padding:16px;
+  }
+
+  /* ---------- View tabs ---------- */
+  .view-tabs{
+    display:flex;gap:8px;margin-bottom:18px;
+  }
+  .tab-btn{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;
+    background:transparent;border:1px solid var(--line);border-radius:999px;
+    padding:9px 20px;color:var(--muted);cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .tab-btn:hover{color:var(--text);border-color:var(--teal);}
+  .tab-btn.active{
+    color:#231a00;background:var(--gold);border-color:var(--gold);
+  }
+
+  /* ---------- Wheel ---------- */
+  .wheel-toolbar{
+    display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;
+  }
+  .wheel-hint{color:var(--muted);font-size:12.5px;font-family:'JetBrains Mono',monospace;}
+
+  .lucky-chance-field{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:6px 8px 6px 16px;
+  }
+  .lucky-chance-field label{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);white-space:nowrap;
+  }
+  .lucky-chance-field input{
+    width:52px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+    padding:5px 10px;outline:none;text-align:center;
+  }
+  .lucky-chance-field input:focus{border-color:var(--gold);}
+  .lucky-chance-field span{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:12px;}
+
+  .wheel-layout{
+    display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;
+  }
+  .wheel-stage{
+    position:relative;
+    width:320px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto;
+    border-radius:50%;
+    transition:box-shadow .3s ease;
+  }
+  .wheel-stage.lucky-active{
+    box-shadow:0 0 0 6px rgba(242,183,5,.18), 0 0 50px 14px rgba(242,183,5,.35);
+  }
+  .lucky-banner{
+    position:absolute;
+    top:-46px;left:50%;
+    transform:translateX(-50%);
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;
+    color:var(--gold);
+    background:var(--stub);
+    border:1px solid var(--gold-dim);
+    border-radius:999px;
+    padding:6px 16px;
+    white-space:nowrap;
+    z-index:5;
+    display:none;
+    animation:luckyPulse 1s ease-in-out infinite;
+  }
+  .lucky-banner.show{display:block;}
+  @keyframes luckyPulse{
+    0%, 100% { transform:translateX(-50%) scale(1); }
+    50% { transform:translateX(-50%) scale(1.06); }
+  }
+  #wheelSvg{
+    width:100%;height:auto;
+    filter:drop-shadow(0 18px 34px rgba(0,0,0,.55));
+  }
+  #wheelGroup{
+    transform-origin:160px 160px;
+    transition:transform 4.2s cubic-bezier(.17,.89,.24,1);
+  }
+  .wheel-pointer{
+    position:absolute;
+    top:-6px;left:50%;
+    transform:translateX(-50%);
+    font-size:30px;
+    color:var(--gold);
+    z-index:3;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
+  }
+  .spin-btn{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:74px;height:74px;
+    border-radius:50%;
+    background:var(--gold);
+    border:4px solid var(--stub);
+    color:#231a00;
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.03em;
+    cursor:pointer;
+    z-index:4;
+    box-shadow:0 10px 22px -8px rgba(0,0,0,.7);
+    transition:transform .12s ease;
+  }
+  .spin-btn:hover:not(:disabled){transform:translate(-50%,-50%) scale(1.05);}
+  .spin-btn:disabled{background:var(--surface-2);color:var(--muted);cursor:not-allowed;border-color:var(--line);}
+
+  .prize-editor{
+    flex:1;
+    min-width:280px;
+  }
+  .prize-editor-head{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+  }
+  .prize-total{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);
+  }
+  .prize-total.warn{color:var(--gold);}
+
+  .prize-tab-switch{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab-btn.small{padding:6px 14px;font-size:12.5px;}
+
+  /* ---------- Halloween ---------- */
+  .wheel-stage.halloween-active{
+    box-shadow:0 0 0 6px rgba(255,138,31,.2), 0 0 50px 14px rgba(255,138,31,.38);
+  }
+  .lucky-banner.halloween{
+    color:#ff8a1f;border-color:#a35410;
+  }
+  button.halloween-toggle{
+    border-color:#a35410;color:#ff8a1f;background:transparent;
+  }
+  button.halloween-toggle.on{
+    background:#ff8a1f;border-color:#ff8a1f;color:#1d0d00;
+  }
+  button.web-stash-btn{
+    border-color:#7b3fc4;color:#b78cf0;background:rgba(123,63,196,.12);
+    font-family:'JetBrains Mono',monospace;
+  }
+  button.web-stash-btn:hover{border-color:#b78cf0;}
+  /* ---------- Naughty ---------- */
+  .wheel-stage.naughty-active{box-shadow:0 0 0 6px rgba(142,27,43,.25), 0 0 50px 14px rgba(142,27,43,.45);}
+  .lucky-banner.naughty{color:#ff5d5d;border-color:#8e1b2b;}
+  button.naughty-toggle{border-color:#8e1b2b;color:#ff6b6b;background:transparent;}
+  button.naughty-toggle.on{background:#8e1b2b;border-color:#8e1b2b;color:#fff;}
+  .history-reason{color:var(--muted);font-weight:400;font-size:10.5px;margin-left:6px;}
+
+  /* ---------- Christmas ---------- */
+  .wheel-stage.christmas-active{
+    box-shadow:0 0 0 6px rgba(212,36,38,.2), 0 0 50px 14px rgba(31,138,76,.4);
+  }
+  .lucky-banner.christmas{color:#ff6b6b;border-color:#1f8a4c;}
+  button.christmas-toggle{border-color:#1f8a4c;color:#5fd68f;background:transparent;}
+  button.christmas-toggle.on{background:#1f8a4c;border-color:#1f8a4c;color:#fff;}
+  button.christmas-btn{
+    background:linear-gradient(135deg,#d42426,#1f8a4c);border-color:#1f8a4c;color:#fff;
+  }
+  button.christmas-btn:hover{filter:brightness(1.1);}
+  .present{
+    flex:1;max-width:110px;min-height:130px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(180deg,#3a1c22,#1d2a22);
+    border:2px solid #1f8a4c;border-radius:14px;color:var(--text);cursor:pointer;padding:10px 6px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;
+    transition:transform .15s ease, border-color .15s ease, opacity .2s ease;
+  }
+  .present .present-emoji{font-size:38px;line-height:1;}
+  .present:hover:not(:disabled){transform:translateY(-3px);border-color:#d42426;}
+  .present:disabled{cursor:default;}
+  .present.revealed{opacity:.55;background:var(--surface-2);border-color:var(--line);}
+  .present.picked{opacity:1;border-color:var(--gold);box-shadow:0 0 22px rgba(242,183,5,.4);}
+  .present .present-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .present.picked .present-tag{color:var(--gold);}
+
+  #christmasSection{margin-top:34px;}
+  .tree-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;margin-bottom:26px;}
+  .tree-card{
+    min-width:196px;flex:0 1 280px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px;text-align:center;
+  }
+  .tree-title{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;margin-bottom:6px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .tree-edit{
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);
+    font-size:10px;padding:0;cursor:pointer;
+  }
+  .tree-svg{width:150px;height:auto;display:block;margin:0 auto 6px;}
+  .tree-count{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px;}
+  .tree-progress{height:7px;border-radius:999px;background:var(--stub);overflow:hidden;margin-bottom:6px;}
+  .tree-progress-fill{height:100%;background:linear-gradient(90deg,#1f8a4c,#f2b705);border-radius:999px;transition:width .3s ease;}
+  .tree-next{font-size:11.5px;color:var(--muted);line-height:1.35;margin-bottom:8px;min-height:30px;}
+  .tree-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+  .tree-chip{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;
+  }
+  .tree-chip.done{color:#5fd68f;border-color:#1f8a4c;background:rgba(31,138,76,.15);}
+
+  .snowman-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;
+  }
+  .snow-head{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;margin-bottom:12px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .snow-built{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal);
+    background:rgba(63,208,201,.12);border-radius:999px;padding:3px 10px;
+  }
+  .snow-slots{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .snow-slot{
+    width:84px;padding:10px 6px;border-radius:12px;border:1px dashed var(--line);background:var(--stub);
+    display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.4;filter:grayscale(1);
+  }
+  .snow-slot.have{opacity:1;filter:none;border-style:solid;border-color:var(--teal);background:rgba(63,208,201,.1);}
+  .snow-emoji{font-size:26px;line-height:1;}
+  .snow-name{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);text-align:center;}
+  .snow-progress{font-size:12.5px;color:var(--muted);margin-bottom:10px;}
+  .buff-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .buff-chip{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);
+    background:rgba(242,183,5,.12);border:1px solid var(--gold-dim);border-radius:999px;padding:3px 11px;
+  }
+  .buff-none{font-size:11.5px;color:var(--muted);}
+  .ms-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;color:var(--muted);}
+  .ms-note{
+    flex:1;min-width:120px;background:var(--stub);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);font-family:'Manrope',sans-serif;font-size:12px;padding:6px 9px;outline:none;
+  }
+  .ms-note:focus{border-color:var(--teal);}
+  .prize-tab-hint{
+    font-size:12px;line-height:1.45;color:var(--muted);margin:-4px 0 12px;
+    border-left:3px solid #1f8a4c;padding-left:10px;
+  }
+  .ms-block{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;
+  }
+  .ms-block .ms-row{margin-bottom:6px;}
+  .ms-block .ms-note{width:100%;}
+  .ms-select{
+    background:var(--stub);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    font-family:'Manrope',sans-serif;font-size:12px;padding:5px 8px;outline:none;max-width:170px;
+  }
+  .ms-select:focus{border-color:var(--teal);}
+  .ms-remove{
+    width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--stub);
+    color:var(--muted);font-size:12px;padding:0;cursor:pointer;margin-left:auto;flex-shrink:0;
+  }
+  .ms-remove:hover{color:var(--danger);border-color:var(--danger);}
+  .ms-emoji{
+    width:56px;background:var(--stub);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    font-size:16px;padding:5px;outline:none;text-align:center;
+  }
+  .ms-add{
+    width:100%;border:2px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;padding:8px;cursor:pointer;margin-bottom:6px;
+  }
+  .ms-add:hover{border-color:var(--teal);color:var(--teal);}
+  .settings-sub{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;margin:14px 0 8px;color:var(--text);
+  }
+  .doors-row{display:flex;gap:12px;justify-content:center;margin:14px 0 16px;}
+  .door{
+    flex:1;max-width:110px;min-height:130px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(180deg,#3a2a14,#24170a);
+    border:2px solid #a35410;border-radius:14px;
+    color:var(--text);cursor:pointer;padding:10px 6px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;
+    transition:transform .15s ease, border-color .15s ease, opacity .2s ease;
+  }
+  .door .door-emoji{font-size:38px;line-height:1;}
+  .door:hover:not(:disabled){transform:translateY(-3px);border-color:#ff8a1f;}
+  .door:disabled{cursor:default;}
+  .door.revealed{opacity:.55;background:var(--surface-2);border-color:var(--line);}
+  .door.picked{opacity:1;border-color:var(--gold);box-shadow:0 0 22px rgba(242,183,5,.4);}
+  .door .door-tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  }
+  .door.picked .door-tag{color:var(--gold);}
+  .doors-result{
+    font-family:'Manrope',sans-serif;font-size:13.5px;line-height:1.45;color:var(--text);
+    min-height:20px;margin-bottom:16px;
+  }
+
+  .prize-color-input{
+    width:24px;height:24px;padding:0;border:2px solid var(--line);border-radius:50%;
+    background:none;cursor:pointer;flex-shrink:0;overflow:hidden;
+  }
+  .prize-color-input::-webkit-color-swatch-wrapper{padding:0;}
+  .prize-color-input::-webkit-color-swatch{border:none;border-radius:50%;}
+  .prize-color-input::-moz-color-swatch{border:none;border-radius:50%;}
+  .prize-color-input:hover{border-color:var(--teal);}
+  .prize-color-reset{
+    width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--muted);font-size:11px;line-height:1;padding:0;cursor:pointer;flex-shrink:0;
+  }
+  .prize-color-reset:hover{color:var(--teal);border-color:var(--teal);}
+  .prize-item-select{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    font-family:'Manrope',sans-serif;font-size:11.5px;padding:5px 8px;outline:none;max-width:130px;
+  }
+  .prize-item-select:focus{border-color:var(--teal);}
+  .prize-item-tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);
+    background:rgba(63,208,201,.12);border-radius:999px;padding:2px 8px;white-space:nowrap;
+  }
+
+  .prize-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    margin-bottom:10px;
+  }
+  .prize-swatch{
+    width:14px;height:14px;border-radius:50%;flex-shrink:0;
+  }
+  .prize-name{
+    flex:1;min-width:0;
+    background:transparent;border:none;outline:none;color:var(--text);
+    font-family:'Manrope',sans-serif;font-weight:600;font-size:13.5px;
+  }
+  .prize-field{
+    display:flex;align-items:center;gap:4px;flex-shrink:0;
+  }
+  .prize-field label{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);text-transform:uppercase;
+  }
+  .prize-field input{
+    width:58px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    padding:5px 6px;outline:none;text-align:right;
+  }
+  .prize-field input:focus{border-color:var(--teal);}
+  .prize-del{
+    width:24px;height:24px;border-radius:50%;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--muted);font-size:12px;
+    display:none;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;
+  }
+  body.prizes-edit-mode .prize-del{display:flex;}
+  .prize-del:hover{color:var(--danger);border-color:var(--danger);}
+
+  .add-prize-btn{
+    display:none;
+    border:2px dashed var(--line);border-radius:12px;background:transparent;
+    color:var(--muted);width:100%;padding:10px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;
+    cursor:pointer;
+  }
+  body.prizes-edit-mode .add-prize-btn{display:block;}
+  .add-prize-btn:hover{border-color:var(--teal);color:var(--teal);}
+
+  .prize-name:disabled, .prize-field input:disabled{
+    opacity:.75;cursor:default;
+  }
+
+  .win-box{text-align:center;max-width:320px;}
+  .win-emoji{font-size:44px;margin-bottom:4px;}
+  .risk-btn{
+    background:linear-gradient(135deg, #ff6b6b, #ff9f5a);
+    border-color:#ff6b6b;
+    color:#2a0000;
+  }
+  .risk-btn:hover{filter:brightness(1.08);}
+  .risk-note{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+    margin-top:10px;
+  }
+
+  /* ---------- Points modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(6,7,20,.72);
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    width:100%;
+    max-width:360px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.8);
+  }
+  .modal-box h3{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:18px;margin:0 0 8px;
+  }
+  .modal-hint{color:var(--muted);font-size:12.5px;line-height:1.4;margin:0 0 16px;}
+  .modal-row{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:18px;
+  }
+  .modal-coin{font-size:18px;}
+  .modal-row input{
+    flex:1;background:transparent;border:none;outline:none;
+    color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+
+  .modal-field{margin-bottom:16px;}
+  .modal-field label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+  }
+  .modal-field select{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    color:var(--text);font-family:'Manrope',sans-serif;font-weight:600;font-size:13.5px;
+    padding:9px 12px;outline:none;cursor:pointer;
+  }
+  .modal-field select:focus{border-color:var(--teal);}
+
+  .random-result{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
+    padding:22px 14px;margin-bottom:18px;
+  }
+  .random-avatar{
+    width:56px;height:56px;border-radius:50%;background:var(--stub);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:20px;color:var(--teal);
+    border:2px solid var(--line);
+  }
+  .random-name{
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:20px;color:var(--gold);
+    text-align:center;
+  }
+  .random-empty{color:var(--muted);font-size:13px;text-align:center;}
+  .random-session-info{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);
+    text-align:center;margin-bottom:16px;
+  }
+  .random-session-info.done{color:var(--gold);}
+
+  .empty-history{color:var(--muted);font-size:13px;text-align:center;padding:14px 0;}
+  .history-day{margin-bottom:14px;}
+  .history-day-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;
+  }
+  .history-date{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13.5px;color:var(--text);
+  }
+  .history-total{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--danger);
+  }
+  .history-row{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:7px 12px;margin-bottom:6px;font-size:12.5px;
+  }
+  .history-name{font-family:'Manrope',sans-serif;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .history-amount{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--danger);flex-shrink:0;}
+  .history-time{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:11px;flex-shrink:0;}
+  #historyList{max-height:340px;overflow-y:auto;margin-bottom:16px;}
+
+  #itemOddsList{max-height:360px;overflow-y:auto;margin-bottom:16px;}
+  .odds-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;margin-bottom:8px;
+  }
+  .odds-name{
+    flex:1;min-width:0;font-family:'Manrope',sans-serif;font-weight:600;font-size:12.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .odds-input{
+    width:60px;background:var(--stub);border:1px solid var(--line);border-radius:8px;
+    color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;
+    padding:5px 7px;outline:none;text-align:center;flex-shrink:0;
+  }
+  .odds-input:focus{border-color:var(--teal);}
+  .odds-pct{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+    width:38px;text-align:right;flex-shrink:0;
+  }
+
+  footer{
+    text-align:center;
+    color:#565d8f;
+    font-size:11.5px;
+    margin-top:40px;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  @media print{
+    body{background:#fff;color:#000;}
+    .toolbar, .del-btn, .add-ticket, .add-chip, .buy-btn, .inv-actions, footer{display:none !important;}
+    .ticket{break-inside:avoid;border-color:#ccc;box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="brand-eyebrow">Classroom Rewards</p>
+      <h1>The <span>Store</span></h1>
+      <p class="sub">Pick a student, spend their points on prizes and passes, and keep track of what they've bought.</p>
+    </div>
+  </header>
+
+  <div class="view-tabs">
+    <button class="tab-btn active" id="tabStoreBtn" data-view="store">🎟️ Store</button>
+    <button class="tab-btn" id="tabWheelBtn" data-view="wheel">🎡 Prize Wheel</button>
+  </div>
+
+  <div class="toolbar" id="storeToolbar">
+    <button class="primary" id="editToggle">✏️ Edit Store</button>
+    <button class="teal" id="studentsToggle">👥 Manage Students</button>
+    <button id="saveBtn">💾 Save</button>
+    <button class="ghost" id="exportBtn">⬇️ Export File</button>
+    <button class="ghost" id="importBtn">⬆️ Import File</button>
+    <input type="file" id="fileInput" accept="application/json">
+    <button class="ghost" id="printBtn">🖨️ Print</button>
+    <button class="teal" id="giveAllBtn">🎁 Give Points to All</button>
+    <button class="teal" id="randomStudentBtn">🎲 Random Student</button>
+    <button class="ghost" id="historyBtn">📉 Points Taken</button>
+    <div class="toolbar-spacer"></div>
+    <span class="save-flash" id="saveFlash">Saved ✓</span>
+  </div>
+
+  <div id="storeView">
+    <div class="roster-section">
+      <div class="roster-head">
+        <div class="roster-title">🧑‍🎓 Students</div>
+      </div>
+      <div class="grade-filter" id="storeGradeFilter"></div>
+      <div class="roster-bar" id="rosterBar"></div>
+    </div>
+
+    <div class="shopper-banner" id="shopperBanner"></div>
+
+    <h2 class="section-title">🎟️ Rewards</h2>
+    <div class="grid" id="grid"></div>
+
+    <h2 class="section-title">🎒 Inventory</h2>
+    <div id="inventoryWrap"></div>
+  </div>
+
+  <div id="wheelView" style="display:none;">
+    <div class="wheel-toolbar">
+      <button class="teal" id="prizesToggle">✏️ Edit Prizes</button>
+      <div class="lucky-chance-field">
+        <label for="luckyChanceInput">🍀 Lucky Wheel Chance</label>
+        <input type="number" id="luckyChanceInput" min="0" max="100">
+        <span>%</span>
+      </div>
+      <button class="ghost" id="itemOddsBtn">🎲 Random Item Odds</button>
+      <button class="halloween-toggle" id="halloweenToggleBtn">🎃 Halloween Mode: Off</button>
+      <button class="ghost" id="doorOddsBtn">🚪 Door Odds</button>
+      <button class="web-stash-btn" id="webStashBtn" title="Points the web has taken. Click to edit." style="display:none;">🕸️ Web Stash: 0</button>
+      <button class="christmas-toggle" id="christmasToggleBtn">🎄 Christmas Mode: Off</button>
+      <button class="ghost" id="christmasSettingsBtn">🎁 Christmas Settings</button>
+      <button class="naughty-toggle" id="naughtyToggleBtn">😈 Naughty Wheel: Off</button>
+      <span class="wheel-hint" id="wheelStudentHint"></span>
+    </div>
+
+    <div class="roster-section">
+      <div class="roster-head">
+        <div class="roster-title">🧑‍🎓 Choose a Student</div>
+      </div>
+      <div class="grade-filter" id="wheelGradeFilter"></div>
+      <div class="roster-bar" id="wheelRosterBar"></div>
+    </div>
+
+    <div class="shopper-banner" id="wheelShopperBanner"></div>
+
+    <div class="wheel-layout">
+      <div class="wheel-stage" id="wheelStage">
+        <div class="lucky-banner" id="luckyBanner">✨ LUCKY WHEEL! ✨</div>
+        <div class="wheel-pointer">▼</div>
+        <svg id="wheelSvg" viewBox="0 0 320 320">
+          <g id="wheelGroup"></g>
+        </svg>
+        <button class="spin-btn" id="spinBtn">SPIN</button>
+      </div>
+
+      <div class="prize-editor">
+        <div class="prize-editor-head">
+          <h2 class="section-title" style="margin:0;">🏆 Prizes</h2>
+          <span class="prize-total" id="prizeTotal"></span>
+        </div>
+        <div class="prize-tab-switch">
+          <button class="tab-btn small active" id="normalWheelTabBtn" data-tab="normal">🎡 Normal Wheel</button>
+          <button class="tab-btn small" id="luckyWheelTabBtn" data-tab="lucky">✨ Lucky Wheel</button>
+          <button class="tab-btn small" id="halloweenWheelTabBtn" data-tab="halloween">🎃 Halloween Wheel</button>
+          <button class="tab-btn small" id="christmasWheelTabBtn" data-tab="christmas">🎄 Christmas Wheel</button>
+          <button class="tab-btn small" id="presentsTabBtn" data-tab="presents">🎁 Presents</button>
+          <button class="tab-btn small" id="naughtyTabBtn" data-tab="naughty">😈 Naughty Wheel</button>
+        </div>
+        <div class="prize-tab-hint" id="prizeTabHint" style="display:none;"></div>
+        <div id="prizeList"></div>
+        <button class="add-prize-btn" id="addPrizeBtn">+ Add Prize</button>
+      </div>
+    </div>
+
+    <div id="christmasSection" style="display:none;">
+      <h2 class="section-title" id="treeTitle">🎄 Class Tree</h2>
+      <div class="tree-row" id="treeRow"></div>
+      <h2 class="section-title">⛄ Snowman</h2>
+      <div id="snowmanCard"></div>
+    </div>
+  </div>
+
+  <footer>The Store — data is saved in this browser. Use Export to keep a backup file.</footer>
+</div>
+
+<div class="modal-overlay" id="winModalOverlay">
+  <div class="modal-box win-box">
+    <div class="win-emoji" id="winEmoji">🎉</div>
+    <h3 id="winModalTitle">You won!</h3>
+    <p class="modal-hint" id="winModalDetail"></p>
+    <div class="modal-actions" id="winModalActions" style="justify-content:center;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="randomModalOverlay">
+  <div class="modal-box">
+    <h3>🎲 Random Student</h3>
+    <p class="modal-hint">Pick a grade and roll for a random student. Each student is only picked once per session.</p>
+    <div class="modal-field">
+      <label for="randomGradeSelect">Grade</label>
+      <select id="randomGradeSelect"></select>
+    </div>
+    <div class="random-result" id="randomResultWrap">
+      <div class="random-avatar" id="randomAvatar">🎲</div>
+      <div class="random-name" id="randomResultName">Ready when you are</div>
+    </div>
+    <div class="random-session-info" id="randomSessionInfo"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="randomResetBtn">🔄 Reset Session</button>
+      <button class="ghost" id="randomCloseBtn">Close</button>
+      <button class="teal" id="randomRollBtn">🎲 Roll</button>
+      <button class="primary" id="randomSelectBtn" disabled>Select Student</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historyModalOverlay">
+  <div class="modal-box" style="max-width:420px;">
+    <h3>📉 Points Taken</h3>
+    <p class="modal-hint">A daily log of points deducted from students (Give Points with a negative amount).</p>
+    <div id="historyList"></div>
+    <div class="modal-actions">
+      <button class="danger-ghost" id="historyClearBtn">Clear Log</button>
+      <button class="primary" id="historyCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="doorsModalOverlay">
+  <div class="modal-box" style="max-width:440px;text-align:center;">
+    <h3>🎃 Trick or Treat?</h3>
+    <p class="modal-hint" id="doorsHint">Pick a door — it could be a treat, a trick, or something stranger…</p>
+    <div class="doors-row" id="doorsRow"></div>
+    <div class="doors-result" id="doorsResult"></div>
+    <div class="modal-actions" id="doorsActions" style="justify-content:center;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="doorOddsModalOverlay">
+  <div class="modal-box" style="max-width:420px;max-height:90vh;overflow-y:auto;">
+    <h3>🚪 Door Odds</h3>
+    <p class="modal-hint">Each door rolls its own outcome. Type any numbers you like — they're scaled to 100%, and the % on the right shows each outcome's real chance.</p>
+    <div class="odds-row"><span class="odds-name">🍬 Treat (candy or 1-100 bonus points)</span><input type="number" min="0" max="100" class="odds-input" id="oddsTreat"><span class="odds-pct door-share" data-key="treat"></span></div>
+    <div class="odds-row"><span class="odds-name">🎭 Trick (prize goes to a classmate)</span><input type="number" min="0" max="100" class="odds-input" id="oddsTrick"><span class="odds-pct door-share" data-key="trick"></span></div>
+    <div class="odds-row"><span class="odds-name">👑 Rare (candy for you + 4 classmates)</span><input type="number" min="0" max="100" class="odds-input" id="oddsRare"><span class="odds-pct door-share" data-key="rare"></span></div>
+    <div class="odds-row"><span class="odds-name">🕸️ Lose everything won so far (feeds the stash)</span><input type="number" min="0" max="100" class="odds-input" id="oddsWipe"><span class="odds-pct door-share" data-key="wipe"></span></div>
+    <div class="odds-row"><span class="odds-name">💰 Web Stash (collect the pot)</span><input type="number" min="0" max="100" class="odds-input" id="oddsStash"><span class="odds-pct door-share" data-key="stash"></span></div>
+    <div class="odds-row"><span class="odds-name">🔄 Back to spin</span><input type="number" min="0" max="100" class="odds-input" id="oddsRespin"><span class="odds-pct door-share" data-key="respin"></span></div>
+    <div class="odds-row"><span class="odds-name">💸 Lose 1-100 points</span><input type="number" min="0" max="100" class="odds-input" id="oddsDrain"><span class="odds-pct door-share" data-key="drain"></span></div>
+    <div class="odds-row"><span class="odds-name">😶 Nothing happens</span><input type="number" min="0" max="100" class="odds-input" id="oddsNothing"><span class="odds-pct door-share" data-key="nothing"></span></div>
+    <div class="odds-row"><span class="odds-name">🍬 When it's a treat, chance it's candy (else bonus points)</span><input type="number" min="0" max="100" class="odds-input" id="oddsCandyShare"><span class="odds-pct">%</span></div>
+    <p class="modal-hint" id="doorOddsSummary" style="margin-top:10px;"></p>
+    <div class="modal-actions">
+      <button class="primary" id="doorOddsCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="presentsModalOverlay">
+  <div class="modal-box" style="max-width:440px;text-align:center;">
+    <h3>🎁 Pick a Present</h3>
+    <p class="modal-hint">Santa left three presents. Pick one!</p>
+    <div class="doors-row" id="presentsRow"></div>
+    <div class="doors-result" id="presentsResult"></div>
+    <div class="modal-actions" id="presentsActions" style="justify-content:center;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="christmasSettingsModalOverlay">
+  <div class="modal-box" style="max-width:460px;max-height:90vh;overflow-y:auto;">
+    <h3>🎁 Christmas Settings</h3>
+    <div id="christmasSettingsBody"></div>
+    <div class="modal-actions">
+      <button class="primary" id="christmasSettingsCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="itemOddsModalOverlay">
+  <div class="modal-box" style="max-width:420px;">
+    <h3>🎲 Random Item Odds</h3>
+    <p class="modal-hint">Set how likely each shop item is to be picked when a prize awards a "Random Item." Higher number = more likely. These are relative weights — they don't need to add up to 100.</p>
+    <div id="itemOddsList"></div>
+    <div class="modal-actions">
+      <button class="primary" id="itemOddsCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pointsModalOverlay">
+  <div class="modal-box">
+    <h3 id="pointsModalTitle">Give points</h3>
+    <p class="modal-hint">Enter a positive number to add points, or a negative number to take points away.</p>
+    <div class="modal-field" id="pointsModalGradeField" style="display:none;">
+      <label for="pointsModalGradeSelect">Grade</label>
+      <select id="pointsModalGradeSelect"></select>
+    </div>
+    <div class="modal-row">
+      <span class="modal-coin">🪙</span>
+      <input type="number" id="pointsModalInput" placeholder="e.g. 50 or -20">
+    </div>
+    <div class="modal-actions">
+      <button class="ghost" id="pointsModalCancel">Cancel</button>
+      <button class="primary" id="pointsModalApply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'pointStoreData_v2';
+
+const DEFAULT_ITEMS = [
+  {name:"1 bonus point", price:100, note:""},
+  {name:"5 bonus points", price:450, note:""},
+  {name:"Spotify music for a week of your choice", price:500, note:""},
+  {name:"Homework/Classwork Pass", price:5000, note:"Can't be used on too complicated works unless you have multiples."},
+  {name:"Late Work Pass", price:1000, note:"Adds 1 day to a due date."},
+  {name:"5 bonus points for everyone", price:2000, note:""},
+  {name:"$10 gift card", price:1000000, note:""},
+  {name:"Cheater pass", price:500, note:"Allows the teacher to help you with 1 thing."},
+];
+
+const DEFAULT_PRIZES = [
+  {label:"Nothing — better luck next time", points:0, percent:25},
+  {label:"5 Points", points:5, percent:20},
+  {label:"10 Points", points:10, percent:20},
+  {label:"20 Points", points:20, percent:15},
+  {label:"50 Points", points:50, percent:10},
+  {label:"Try Again", points:0, percent:5},
+  {label:"JACKPOT! 100 Points", points:100, percent:5},
+];
+
+const DEFAULT_LUCKY_PRIZES = [
+  {label:"🎉 50 Points", points:50, percent:35},
+  {label:"💎 100 Points", points:100, percent:30},
+  {label:"👑 250 Points JACKPOT", points:250, percent:15},
+  {label:"🎁 Mystery Prize", points:20, percent:20, itemId:"RANDOM"},
+];
+
+const DEFAULT_HALLOWEEN_PRIZES = [
+  {label:"🍬 Candy", points:0, percent:22, itemId:"CANDY"},
+  {label:"🎃 Pumpkin Points (25)", points:25, percent:17},
+  {label:"🦇 Bat Bonus (50)", points:50, percent:9},
+  {label:"🧙 Witch's Brew (random item)", points:0, percent:9, itemId:"RANDOM"},
+  {label:"💀 Spooky Jackpot (100)", points:100, percent:4},
+  {label:"👻 Boo! (10)", points:10, percent:11},
+  {label:"🕷️ Stuck in the web (lose everything won so far)", points:0, percent:13, itemId:"WEB"},
+  {label:"🍭 Sweet Treat (10)", points:10, percent:9},
+  {label:"👑 MEGA JACKPOT (200)", points:200, percent:2},
+  {label:"🕸️ Web Stash (collect the pot)", points:0, percent:4, itemId:"STASH"},
+];
+const HALLOWEEN_STASH_PRIZE = [
+  {label:"🕸️ Web Stash (collect the pot)", points:0, percent:4, itemId:"STASH"},
+];
+// Added to wheels saved before these existed (one time, odds of existing prizes untouched)
+const HALLOWEEN_EXTRA_PRIZES = [
+  {label:"🍭 Sweet Treat (10)", points:10, percent:10},
+  {label:"👑 MEGA JACKPOT (200)", points:200, percent:2},
+];
+const DEFAULT_HALLOWEEN_ODDS = { treat:34, trick:25, rare:8, wipe:5, respin:10, drain:8, nothing:10, stash:6, candyShare:60 };
+
+const WHEEL_COLORS = ['#f2b705','#3fd0c9','#8b7cf6','#ff6b6b','#54e0a8','#ff9f5a','#5aa9ff','#e05fd0'];
+const CHRISTMAS_COLORS = ['#d42426','#1f8a4c','#f2b705','#e8eef7','#b02a37','#2f9e5f','#f7d36b'];
+const DEFAULT_SNOWMAN_PIECES = [
+  {id:'hat', emoji:'🎩', name:'Top Hat'},
+  {id:'nose', emoji:'🥕', name:'Carrot Nose'},
+  {id:'scarf', emoji:'🧣', name:'Scarf'},
+  {id:'buttons', emoji:'⚫', name:'Coal Buttons'},
+  {id:'eyes', emoji:'👀', name:'Coal Eyes'},
+];
+const COCOA_BONUS = 10;    // extra points per win while Hot Cocoa is active
+const COCOA_CHARGES = 3;   // how many wins one Hot Cocoa lasts
+// What can be inside the three presents (edited on the "Presents" prize tab)
+const RANDOM_CAPPED_MAX_PRICE = 10000;
+const POINTS_PRESENT_MIN = 100, POINTS_PRESENT_MAX = 1000;
+const POINTS_PRESENT = {label:"💰 Store Points Jackpot (100–1000 pts)", points:0, percent:10, itemId:"RANDOM_POINTS"};
+const CAPPED_PRESENT = {label:"🎲 Surprise Gift (random item up to 10,000 pts)", points:0, percent:1, itemId:"RANDOM_CAPPED"};
+const DEFAULT_PRESENT_PRIZES = [
+  {label:"🎄 Ornament for the class tree", points:0, percent:20.55, itemId:"ORNAMENT"},
+  {label:"⛄ Snowman piece", points:0, percent:20.55, itemId:"SNOWMAN"},
+  {label:"✨ Elf Helper (next win ×2)", points:0, percent:10.72, itemId:"BUFF_DOUBLE"},
+  {label:"☕ Hot Cocoa (+10 on next 3 wins)", points:0, percent:10.72, itemId:"BUFF_COCOA"},
+  {label:"🍬 Candy", points:0, percent:7.15, itemId:"CANDY"},
+  {label:"➕ 1 Bonus Point", points:0, percent:6.25, itemId:"@BONUS_POINT"}, // resolved to the shop's "1 bonus point" item
+  {label:"🎁 Mystery Gift (random item)", points:0, percent:7.96, itemId:"RANDOM"},
+  {label:"💰 Store Points Jackpot (100–1000 pts)", points:0, percent:10, itemId:"RANDOM_POINTS"},
+  {label:"🎲 Surprise Gift (random item up to 10,000 pts)", points:0, percent:1, itemId:"RANDOM_CAPPED"},
+  {label:"🌟 Christmas Spirit (snowman piece + ornament)", points:0, percent:5, itemId:"SPIRIT"},
+  {label:"🎆 Ultimate Christmas Present (Skip the Final Test)", points:0, percent:0.1, itemId:"ULTIMATE"},
+];
+// The two very rare presents, added once to present lists saved before they existed
+const RARE_PRESENT_PRIZES = [
+  {label:"🌟 Christmas Spirit (snowman piece + ornament)", points:0, percent:5, itemId:"SPIRIT"},
+  {label:"🎆 Ultimate Christmas Present (Skip the Final Test)", points:0, percent:0.1, itemId:"ULTIMATE"},
+];
+const DEFAULT_CHRISTMAS_PRIZES = [
+  {label:"🎄 Add an Ornament", points:0, percent:18, itemId:"ORNAMENT"},
+  {label:"⛄ Snowman Piece", points:0, percent:15, itemId:"SNOWMAN"},
+  {label:"🎁 Open a Present", points:0, percent:14, itemId:"PRESENT"},
+  {label:"✨ Elf Helper (next win ×2)", points:0, percent:6, itemId:"BUFF_DOUBLE"},
+  {label:"☕ Hot Cocoa (+10 on next 3 wins)", points:0, percent:6, itemId:"BUFF_COCOA"},
+  {label:"⭐ Star Points (25)", points:25, percent:12},
+  {label:"🔔 Jingle Bonus (10)", points:10, percent:15},
+  {label:"🎅 Santa's Jackpot (200)", points:200, percent:2},
+  {label:"❄️ Snowflake (5)", points:5, percent:8},
+  {label:"🎁 Mystery Gift (random item)", points:0, percent:4, itemId:"RANDOM"},
+];
+// Rolled every time a snowman is finished (relative weights; defaults add up to 100)
+const MIRACLE_KEYS = ['none', 'present', 'cocoa', 'elf'];
+const DEFAULT_CHRISTMAS_SETTINGS = {
+  snowmanReward: { points: 100, itemId: null },
+  miracleOdds: { none: 25, present: 25, cocoa: 40, elf: 10 },
+  snowmanPieces: DEFAULT_SNOWMAN_PIECES,
+  milestones: [
+    {count:10, points:25, itemId:null, note:''},
+    {count:25, points:50, itemId:null, note:'Free-choice day!'},
+    {count:50, points:100, itemId:null, note:'Class party!'},
+  ],
+};
+// Naughty wheel: every slice has the same chance. Slices either save you, lose flat points (max 100) or lose a % of the balance (max 50%).
+const NAUGHTY_TYPES = ['NAUGHTY_SAVED', 'NAUGHTY_FLAT', 'NAUGHTY_PCT'];
+const NAUGHTY_MAX_FLAT = 100;
+const NAUGHTY_MAX_PCT = 50;
+const NAUGHTY_HINT = "Every slice has the same chance. Flat slices lose up to 100 points; % slices lose up to 50% of the student's balance (nothing if it's 0 or below). Debt has no limit. Spin it for the selected student: you get a confirm first and an Undo after.";
+const DEFAULT_NAUGHTY_PRIZES = [
+  {label:"😇 Saved by Santa's mercy", points:0, percent:10, itemId:"NAUGHTY_SAVED"},
+  {label:"−10 points", points:10, percent:10, itemId:"NAUGHTY_FLAT"},
+  {label:"−10% of balance", points:10, percent:10, itemId:"NAUGHTY_PCT"},
+  {label:"−25 points", points:25, percent:10, itemId:"NAUGHTY_FLAT"},
+  {label:"−20% of balance", points:20, percent:10, itemId:"NAUGHTY_PCT"},
+  {label:"−50 points", points:50, percent:10, itemId:"NAUGHTY_FLAT"},
+  {label:"−30% of balance", points:30, percent:10, itemId:"NAUGHTY_PCT"},
+  {label:"−75 points", points:75, percent:10, itemId:"NAUGHTY_FLAT"},
+  {label:"−50% of balance", points:50, percent:10, itemId:"NAUGHTY_PCT"},
+  {label:"−100 points", points:100, percent:10, itemId:"NAUGHTY_FLAT"},
+];
+const HALLOWEEN_COLORS = ['#ff8a1f','#7b3fc4','#6cc24a','#d9531e','#a35bd6','#f2b705','#3d2a5c'];
+// Fresh installs start with one example grade and student; rename or delete them in Manage Students.
+const DEFAULT_GRADES = ['Test'];
+const DEFAULT_STUDENTS = [{ name: 'Test Student', grade: 'Test', balance: 100 }];
+let GRADES = DEFAULT_GRADES.slice();
+
+let items = [];
+let students = [];
+let prizes = [];
+let luckyPrizes = [];
+let luckyWheelChance = 10;
+let halloweenPrizes = [];
+let halloweenMode = false;
+let halloweenOdds = { ...DEFAULT_HALLOWEEN_ODDS };
+let halloweenInitialized = false;
+let halloweenExtrasAdded = false;
+let halloweenWebMigrated = false;
+let halloweenStashMigrated = false;
+let webStash = 0; // store points taken by the web, waiting to be won
+let christmasPrizes = [];
+let naughtyPrizes = [];
+let naughtyMode = false;
+let currentSpinIsNaughty = false;
+let naughtyUndo = null; // { studentId, amount, txId } for the latest Naughty spin
+let presentPrizes = [];
+let presentsNoPointsMigrated = false;
+let presentsRareMigrated = false;
+let presentsCappedMigrated = false;
+let presentsPointsMigrated = false;
+let christmasMode = false;
+let christmasSettings = JSON.parse(JSON.stringify(DEFAULT_CHRISTMAS_SETTINGS));
+let trees = {};               // { gradeName: { ornaments, unlocked: [milestoneCounts] } }
+let currentSpinIsChristmas = false;
+let christmasContext = null;  // { studentId } while a present is being opened
+let halloweenExtrasJustAdded = false;
+let currentSpinIsHalloween = false;
+let halloweenReward = null; // everything won so far this round: { studentId, points, items: {itemId: qty} }
+let activePrizeTab = 'normal';
+let currentWheelPool = null; // set after prizes/luckyPrizes load
+let currentSpinIsLucky = false;
+let activeStudentId = null;
+let editMode = false;
+let studentsEditMode = false;
+let prizesEditMode = false;
+let activeView = 'store';
+let isSpinning = false;
+let gradeFilter = 'all';
+let transactions = [];
+
+function uid(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'id-' + Math.random().toString(36).slice(2) + Date.now();
+}
+
+function withIds(list){
+  return list.map(it => {
+    const price = Math.max(0, Number(it.price) || 0);
+    const weight = it.weight != null ? Math.max(0, Number(it.weight) || 0) : Math.max(1, Math.round(1000 / Math.max(1, price)));
+    return { id: it.id || uid(), name: it.name || '', price, note: it.note || '', weight, special: it.special || null, hidden: !!it.hidden };
+  });
+}
+
+function withPrizeIds(list){
+  return list.map(p => ({ id: p.id || uid(), label: p.label || 'Prize', points: Number(p.points)||0, percent: Number(p.percent)||0, itemId: p.itemId || null, color: /^#[0-9a-f]{6}$/i.test(p.color || '') ? p.color : null }));
+}
+
+function normalizeStudent(s){
+  return {
+    id: s.id || uid(),
+    name: s.name || 'Student',
+    grade: GRADES.includes(s.grade) ? s.grade : GRADES[0],
+    balance: Number(s.balance) || 0,
+    inventory: s.inventory || {},
+    snowman: {
+      pieces: Array.isArray(s.snowman && s.snowman.pieces) ? s.snowman.pieces.filter(id => typeof id === 'string') : [],
+      built: Math.max(0, Math.round(Number(s.snowman && s.snowman.built) || 0)),
+    },
+    buffs: {
+      double: Math.max(0, Math.round(Number(s.buffs && s.buffs.double) || 0)),
+      cocoa: Math.max(0, Math.round(Number(s.buffs && s.buffs.cocoa) || 0)),
+    },
+  };
+}
+
+/** Students created elsewhere may not have snowman/buff data yet. */
+function xmasExtras(s){
+  if(!s.snowman) s.snowman = { pieces: [], built: 0 };
+  if(!s.buffs) s.buffs = { double: 0, cocoa: 0 };
+  return s;
+}
+
+function addGrade(){
+  const name = prompt('New grade name (e.g. 8th, Kindergarten, Homeroom A):');
+  if(!name) return;
+  const trimmed = name.trim();
+  if(!trimmed) return;
+  if(GRADES.some(g => g.toLowerCase() === trimmed.toLowerCase())){
+    alert(`"${trimmed}" already exists.`);
+    return;
+  }
+  GRADES.push(trimmed);
+  persist();
+  renderAll();
+}
+
+function renameGrade(oldName){
+  const name = prompt(`Rename "${oldName}" grade to:`, oldName);
+  if(!name) return;
+  const trimmed = name.trim();
+  if(!trimmed || trimmed === oldName) return;
+  if(GRADES.some(g => g.toLowerCase() === trimmed.toLowerCase())){
+    alert(`"${trimmed}" already exists.`);
+    return;
+  }
+  const idx = GRADES.indexOf(oldName);
+  if(idx === -1) return;
+  GRADES[idx] = trimmed;
+  students.forEach(s => { if(s.grade === oldName) s.grade = trimmed; });
+  if(trees[oldName]){ trees[trimmed] = trees[oldName]; delete trees[oldName]; }
+  if(gradeFilter === oldName) gradeFilter = trimmed;
+  persist();
+  renderAll();
+}
+
+function deleteGrade(name){
+  if(GRADES.length <= 1){
+    alert('You need at least one grade.');
+    return;
+  }
+  const count = students.filter(s => s.grade === name).length;
+  if(count > 0){
+    alert(`"${name}" still has ${count} student${count === 1 ? '' : 's'}. Move them to another grade first.`);
+    return;
+  }
+  if(!confirm(`Delete the "${name}" grade? This can't be undone.`)) return;
+  GRADES = GRADES.filter(g => g !== name);
+  delete trees[name];
+  if(gradeFilter === name) gradeFilter = 'all';
+  persist();
+  renderAll();
+}
+
+function applyHalloweenState(parsed){
+  const src = parsed || {};
+  const hadSavedPrizes = !!(src.halloweenPrizes && src.halloweenPrizes.length);
+  halloweenPrizes = withPrizeIds(hadSavedPrizes ? src.halloweenPrizes : DEFAULT_HALLOWEEN_PRIZES);
+  halloweenExtrasAdded = !!src.halloweenExtrasAdded;
+  if(!halloweenExtrasAdded){
+    if(hadSavedPrizes){
+      halloweenPrizes = halloweenPrizes.concat(withPrizeIds(HALLOWEEN_EXTRA_PRIZES));
+      halloweenExtrasJustAdded = true;
+    }
+    halloweenExtrasAdded = true;
+  }
+  halloweenMode = !!src.halloweenMode;
+  const o = src.halloweenOdds || {};
+  const D = DEFAULT_HALLOWEEN_ODDS;
+  const pct = (v, d) => Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : d;
+  halloweenOdds = {
+    trick: pct(o.trick, D.trick),
+    rare: pct(o.rare, D.rare),
+    wipe: pct(o.wipe, D.wipe),
+    respin: pct(o.respin, D.respin),
+    drain: pct(o.drain, D.drain),
+    nothing: pct(o.nothing, D.nothing),
+    stash: pct(o.stash, D.stash),
+    candyShare: pct(o.candyShare, D.candyShare),
+  };
+  // Treat used to be "whatever is left"; keep that as its starting value for older saves
+  const others = halloweenOdds.trick + halloweenOdds.rare + halloweenOdds.wipe + halloweenOdds.respin + halloweenOdds.drain + halloweenOdds.nothing;
+  halloweenOdds.treat = pct(o.treat, Math.max(0, 100 - others));
+  // One time: make an existing "Stuck in the web" prize actually wipe the round's winnings
+  halloweenWebMigrated = !!src.halloweenWebMigrated;
+  if(!halloweenWebMigrated){
+    if(hadSavedPrizes){
+      halloweenPrizes.forEach(pr => {
+        if(!pr.itemId && /stuck in the web/i.test(pr.label)){ pr.itemId = 'WEB'; halloweenExtrasJustAdded = true; }
+      });
+    }
+    halloweenWebMigrated = true;
+  }
+  // One time: add the Web Stash prize to wheels saved before it existed
+  halloweenStashMigrated = !!src.halloweenStashMigrated;
+  if(!halloweenStashMigrated){
+    if(hadSavedPrizes && !halloweenPrizes.some(pr => pr.itemId === 'STASH')){
+      halloweenPrizes = halloweenPrizes.concat(withPrizeIds(HALLOWEEN_STASH_PRIZE));
+      halloweenExtrasJustAdded = true;
+    }
+    halloweenStashMigrated = true;
+  }
+  webStash = Number.isFinite(src.webStash) ? Math.max(0, Math.round(src.webStash)) : 0;
+  halloweenInitialized = !!src.halloweenInitialized;
+  applyChristmasState(src);
+  applyNaughtyState(src);
+}
+
+function naughtyLabel(pr){
+  if(pr.itemId === 'NAUGHTY_SAVED') return "😇 Saved by Santa's mercy";
+  if(pr.itemId === 'NAUGHTY_PCT') return `−${pr.points}% of balance`;
+  return `−${pr.points} points`;
+}
+/** The Naughty wheel is always equal odds: re-split whenever slices are added or removed. */
+function equalizeNaughty(){
+  const n = naughtyPrizes.length;
+  naughtyPrizes.forEach(pr => { pr.percent = n ? 100 / n : 0; });
+}
+function applyNaughtyState(src){
+  src = src || {};
+  const base = src.naughtyPrizes && src.naughtyPrizes.length ? src.naughtyPrizes : DEFAULT_NAUGHTY_PRIZES;
+  naughtyPrizes = withPrizeIds(base).map(pr => {
+    const type = NAUGHTY_TYPES.includes(pr.itemId) ? pr.itemId : 'NAUGHTY_FLAT';
+    const max = type === 'NAUGHTY_PCT' ? NAUGHTY_MAX_PCT : NAUGHTY_MAX_FLAT;
+    const points = type === 'NAUGHTY_SAVED' ? 0 : Math.max(1, Math.min(max, Math.round(pr.points) || 1));
+    return { ...pr, itemId: type, points };
+  });
+  equalizeNaughty();
+  naughtyMode = !!src.naughtyMode && !halloweenMode && !christmasMode;
+}
+function naughtyColor(pr, idx){
+  if(pr.itemId === 'NAUGHTY_SAVED') return '#2f9e5f';
+  if(pr.itemId === 'NAUGHTY_PCT') return idx % 2 ? '#7b3fc4' : '#5b2a86';
+  return idx % 2 ? '#b3263a' : '#8e1b2b';
+}
+
+/** Apply a Naughty slice to a student. No caps, no floor: debt can go as deep as it goes. */
+function applyNaughtyPrize(s, prize){
+  const before = s.balance;
+  let kind = 'saved', amount = 0, pct = 0;
+  if(prize.itemId === 'NAUGHTY_FLAT'){
+    kind = 'flat';
+    amount = Math.max(0, Math.round(prize.points));
+  } else if(prize.itemId === 'NAUGHTY_PCT'){
+    kind = 'pct';
+    pct = prize.points;
+    amount = before > 0 ? Math.round(before * pct / 100) : 0; // a % of nothing (or of debt) takes nothing
+  }
+  let txId = null;
+  if(amount > 0){
+    s.balance -= amount;
+    txId = uid();
+    transactions.push({
+      id: txId, date: todayStr(), studentId: s.id, studentName: s.name, amount: -amount, timestamp: Date.now(),
+      reason: kind === 'pct' ? `😈 Naughty wheel (−${pct}%)` : `😈 Naughty wheel (−${amount})`,
+    });
+  }
+  naughtyUndo = amount > 0 ? { studentId: s.id, amount, txId } : null;
+  return { kind, amount, pct, before, after: s.balance };
+}
+
+function undoNaughty(){
+  const u = naughtyUndo;
+  if(u){
+    const s = getStudent(u.studentId);
+    if(s) s.balance += u.amount;
+    transactions = transactions.filter(t => t.id !== u.txId);
+    naughtyUndo = null;
+    persist(true);
+    renderAll();
+  }
+  closeWinModal();
+}
+
+/** The shop's "1 bonus point" item. Item ids are made per install, so it's found by name. */
+function findBonusPointItem(){
+  return items.find(it => /^\s*1\s*bonus\s*point\s*$/i.test(it.name)) || null;
+}
+
+/** Swap the '@BONUS_POINT' placeholder for the real shop item id (dropping it if the shop has no such item). */
+function resolvePresentPlaceholders(list){
+  const bonus = findBonusPointItem();
+  return list
+    .filter(pr => pr.itemId !== '@BONUS_POINT' || bonus)
+    .map(pr => pr.itemId === '@BONUS_POINT' ? { ...pr, itemId: bonus.id } : pr);
+}
+
+/** Scale the everyday prizes so the rare ones keep their exact percentage of the total. */
+function fitRarePrizes(list){
+  const isRare = p => p.itemId === 'SPIRIT' || p.itemId === 'ULTIMATE' || p.itemId === 'RANDOM_CAPPED' || p.itemId === 'RANDOM_POINTS';
+  const rareTotal = list.filter(isRare).reduce((a, p) => a + p.percent, 0);
+  const rest = list.filter(p => !isRare(p));
+  const total = rest.reduce((a, p) => a + Math.max(0, p.percent), 0);
+  if(total > 0) rest.forEach(p => { p.percent = Math.round(Math.max(0, p.percent) * ((100 - rareTotal) / total) * 100) / 100; });
+  return list;
+}
+
+function buildPresentDefaults(odds){
+  const list = DEFAULT_PRESENT_PRIZES.map(p => ({ ...p }));
+  // Carry over odds tuned in the first Christmas version
+  if(odds && typeof odds === 'object'){
+    const set = (itemId, v) => {
+      const pr = list.find(x => x.itemId === itemId);
+      if(pr && Number.isFinite(v)) pr.percent = Math.round(Math.max(0, v) * 10) / 10;
+    };
+    set('ORNAMENT', odds.ornament); set('SNOWMAN', odds.snowman);
+    set('BUFF_DOUBLE', odds.elf); set('BUFF_COCOA', odds.cocoa); set('RANDOM', odds.gift);
+    if(Number.isFinite(odds.points)){
+      // the old "points" share now goes to candy + bonus point
+      set('CANDY', odds.points * 8 / 15);
+      set('@BONUS_POINT', odds.points * 7 / 15);
+    }
+    fitRarePrizes(list);
+  }
+  return resolvePresentPlaceholders(list);
+}
+
+function applyChristmasState(src){
+  src = src || {};
+  christmasPrizes = withPrizeIds(src.christmasPrizes && src.christmasPrizes.length ? src.christmasPrizes : DEFAULT_CHRISTMAS_PRIZES);
+  christmasMode = !!src.christmasMode && !halloweenMode;
+  const D = DEFAULT_CHRISTMAS_SETTINGS;
+  const cs = src.christmasSettings || {};
+
+  const savedMs = Array.isArray(cs.milestones) && cs.milestones.length ? cs.milestones.slice(0, 12) : D.milestones;
+  const sr = cs.snowmanReward || {};
+  const savedPieces = Array.isArray(cs.snowmanPieces) && cs.snowmanPieces.length ? cs.snowmanPieces.slice(0, 12) : D.snowmanPieces;
+  christmasSettings = {
+    snowmanReward: {
+      points: Number.isFinite(sr.points) ? Math.max(0, Math.round(sr.points))
+        : (Number.isFinite(cs.snowmanBonus) ? Math.max(0, Math.round(cs.snowmanBonus)) : D.snowmanReward.points),
+      itemId: sr.itemId || null,
+    },
+    miracleOdds: (() => {
+      const o = cs.miracleOdds || {};
+      const out = {};
+      MIRACLE_KEYS.forEach(k => { out[k] = Number.isFinite(o[k]) ? Math.max(0, Math.min(100, o[k])) : D.miracleOdds[k]; });
+      return out;
+    })(),
+    snowmanPieces: savedPieces.map(pc => ({
+      id: String(pc.id || uid()),
+      emoji: Array.from(String(pc.emoji || '⛄')).slice(0, 3).join(''),
+      name: String(pc.name || 'Piece').slice(0, 30),
+    })),
+    milestones: savedMs.map(m => ({
+      count: Math.max(1, Math.round(Number(m.count) || 1)),
+      points: Math.max(0, Math.round(Number(m.points) || 0)),
+      itemId: m.itemId || null,
+      note: typeof m.note === 'string' ? m.note : '',
+    })),
+  };
+
+  const hadPresents = Array.isArray(src.presentPrizes) && src.presentPrizes.length;
+  presentPrizes = withPrizeIds(hadPresents ? src.presentPrizes : buildPresentDefaults(cs.presentOdds));
+  // One time: presents no longer hold store points — swap them for Candy and the shop's 1 bonus point
+  presentsNoPointsMigrated = !!src.presentsNoPointsMigrated;
+  if(!presentsNoPointsMigrated){
+    if(hadPresents){
+      presentPrizes = presentPrizes.filter(pr => pr.itemId || !(pr.points > 0));
+      if(!presentPrizes.some(pr => pr.itemId === 'CANDY')){
+        presentPrizes = presentPrizes.concat(withPrizeIds([{ label: '🍬 Candy', points: 0, percent: 8, itemId: 'CANDY' }]));
+      }
+      const bonus = findBonusPointItem();
+      if(bonus && !presentPrizes.some(pr => pr.itemId === bonus.id)){
+        presentPrizes = presentPrizes.concat(withPrizeIds([{ label: '➕ 1 Bonus Point', points: 0, percent: 7, itemId: bonus.id }]));
+      }
+      halloweenExtrasJustAdded = true; // save the updated list
+    }
+    presentsNoPointsMigrated = true;
+  }
+  // One time: add the two very rare presents (Christmas Spirit 5%, Ultimate Christmas Present 0.1%)
+  presentsRareMigrated = !!src.presentsRareMigrated;
+  if(!presentsRareMigrated){
+    if(hadPresents){
+      const add = RARE_PRESENT_PRIZES.filter(rp => !presentPrizes.some(pr => pr.itemId === rp.itemId));
+      if(add.length){
+        const addTotal = add.reduce((a, rp) => a + rp.percent, 0);
+        const total = presentPrizes.reduce((a, pr) => a + Math.max(0, pr.percent), 0);
+        if(total > 0){
+          // keep your relative odds, but make room so the new ones land at exactly their stated chance
+          const f = (100 - addTotal) / total;
+          presentPrizes.forEach(pr => { pr.percent = Math.round(Math.max(0, pr.percent) * f * 100) / 100; });
+        }
+        presentPrizes = presentPrizes.concat(withPrizeIds(add));
+        halloweenExtrasJustAdded = true;
+      }
+    }
+    presentsRareMigrated = true;
+  }
+  // One time: add the 1% capped Surprise Gift to saved present lists
+  presentsCappedMigrated = !!src.presentsCappedMigrated;
+  if(!presentsCappedMigrated){
+    if(hadPresents && !presentPrizes.some(pr => pr.itemId === 'RANDOM_CAPPED')){
+      const total = presentPrizes.reduce((a, pr) => a + Math.max(0, pr.percent), 0);
+      if(total > 0){
+        const f = (100 - CAPPED_PRESENT.percent) / total;
+        presentPrizes.forEach(pr => { pr.percent = Math.round(Math.max(0, pr.percent) * f * 100) / 100; });
+      }
+      presentPrizes = presentPrizes.concat(withPrizeIds([CAPPED_PRESENT]));
+      presentPrizes = fitRarePrizes(presentPrizes) || presentPrizes;
+      halloweenExtrasJustAdded = true;
+    }
+    presentsCappedMigrated = true;
+  }
+  // One time: add the 10% Store Points Jackpot (random 100-1000) to saved present lists
+  presentsPointsMigrated = !!src.presentsPointsMigrated;
+  if(!presentsPointsMigrated){
+    if(hadPresents && !presentPrizes.some(pr => pr.itemId === 'RANDOM_POINTS')){
+      presentPrizes = presentPrizes.concat(withPrizeIds([POINTS_PRESENT]));
+      presentPrizes = fitRarePrizes(presentPrizes) || presentPrizes;
+      halloweenExtrasJustAdded = true;
+    }
+    presentsPointsMigrated = true;
+  }
+  // Hot Cocoa now gives +10: refresh the old default wording on saved prizes
+  [christmasPrizes, presentPrizes].forEach(list => list.forEach(pr => {
+    if(pr.itemId === 'BUFF_COCOA') pr.label = pr.label.replace('+5 on next 3 wins', '+10 on next 3 wins');
+  }));
+
+  trees = {};
+  if(src.trees && typeof src.trees === 'object'){
+    Object.entries(src.trees).forEach(([g, t]) => {
+      trees[g] = {
+        ornaments: Math.max(0, Math.round(Number(t && t.ornaments) || 0)),
+        unlocked: Array.isArray(t && t.unlocked) ? t.unlocked.filter(Number.isFinite) : [],
+      };
+    });
+  }
+}
+
+/** Find the shop's Candy item, creating it (base cost 50 points) if it's missing. */
+function getCandyItem(){
+  let candy = items.find(it => it.special === 'candy');
+  if(!candy){
+    candy = { id: uid(), name: '🍬 Candy', price: 50, note: 'Halloween treat!', weight: 20, special: 'candy' };
+    items.push(candy);
+  }
+  return candy;
+}
+
+/** The unique "Skip the Final Test" item. It's hidden from the shop and can only be won from the Ultimate Christmas Present. */
+function getUltimateItem(){
+  let item = items.find(it => it.special === 'ultimate');
+  if(!item){
+    item = { id: uid(), name: '🎓 Skip the Final Test', price: 0, note: 'Won only from the Ultimate Christmas Present', weight: 0, special: 'ultimate', hidden: true };
+    items.push(item);
+  }
+  return item;
+}
+
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try{
+      const parsed = JSON.parse(raw);
+      GRADES = (Array.isArray(parsed.grades) && parsed.grades.length) ? parsed.grades.slice() : DEFAULT_GRADES.slice();
+      items = withIds(parsed.items || []);
+      students = (parsed.students || []).map(normalizeStudent);
+      prizes = withPrizeIds(parsed.prizes && parsed.prizes.length ? parsed.prizes : DEFAULT_PRIZES);
+      luckyPrizes = withPrizeIds(parsed.luckyPrizes && parsed.luckyPrizes.length ? parsed.luckyPrizes : DEFAULT_LUCKY_PRIZES);
+      luckyWheelChance = Number.isFinite(parsed.luckyWheelChance) ? Math.max(0, Math.min(100, parsed.luckyWheelChance)) : 10;
+      applyHalloweenState(parsed);
+      transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+      activeStudentId = parsed.activeStudentId || (students[0] ? students[0].id : null);
+      return;
+    }catch(e){ /* fall through */ }
+  }
+
+  // Try migrating old v1 single-balance format
+  const oldRaw = localStorage.getItem('pointStoreData_v1');
+  if(oldRaw){
+    try{
+      const old = JSON.parse(oldRaw);
+      GRADES = DEFAULT_GRADES.slice();
+      items = withIds(old.items || DEFAULT_ITEMS);
+      students = [normalizeStudent({ name: 'Student 1', balance: Number(old.balance)||0 })];
+      prizes = withPrizeIds(DEFAULT_PRIZES);
+      luckyPrizes = withPrizeIds(DEFAULT_LUCKY_PRIZES);
+      luckyWheelChance = 10;
+      applyHalloweenState(null);
+      transactions = [];
+      activeStudentId = students[0].id;
+      return;
+    }catch(e){ /* fall through */ }
+  }
+
+  GRADES = DEFAULT_GRADES.slice();
+  items = withIds(JSON.parse(JSON.stringify(DEFAULT_ITEMS)));
+  students = DEFAULT_STUDENTS.map(normalizeStudent);
+  prizes = withPrizeIds(DEFAULT_PRIZES);
+  luckyPrizes = withPrizeIds(DEFAULT_LUCKY_PRIZES);
+  luckyWheelChance = 10;
+  applyHalloweenState(null);
+  transactions = [];
+  activeStudentId = students[0] ? students[0].id : null;
+}
+
+function currentState(){
+  return { items, students, prizes, luckyPrizes, luckyWheelChance, halloweenPrizes, halloweenMode, halloweenOdds, halloweenInitialized, halloweenExtrasAdded, halloweenWebMigrated, halloweenStashMigrated, webStash, christmasPrizes, presentPrizes, presentsNoPointsMigrated, presentsRareMigrated, presentsCappedMigrated, presentsPointsMigrated, naughtyPrizes, naughtyMode, christmasMode, christmasSettings, trees, grades: GRADES, transactions, activeStudentId, savedAt: new Date().toISOString() };
+}
+
+function persist(flash){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState()));
+  if(flash){
+    const el = document.getElementById('saveFlash');
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), 1400);
+  }
+}
+
+function getStudent(id){ return students.find(s => s.id === id) || null; }
+function formatPrice(n){ return (Number(n)||0).toLocaleString('en-US'); }
+function debtClass(balance){ return balance < 0 ? ' debt' : ''; }
+function initials(name){
+  const parts = (name||'').trim().split(/\s+/).filter(Boolean);
+  if(parts.length === 0) return '?';
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+/* ---------------- Grade filter ---------------- */
+function filteredStudents(){
+  return gradeFilter === 'all' ? students : students.filter(s => s.grade === gradeFilter);
+}
+
+function renderGradeFilter(containerId, allowAdd){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const showControls = allowAdd && studentsEditMode;
+
+  let html = `<button class="grade-pill ${gradeFilter === 'all' ? 'active' : ''}" data-grade="all">All</button>`;
+  html += GRADES.map(g => {
+    const pill = `<button class="grade-pill ${gradeFilter === g ? 'active' : ''}" data-grade="${g}">${g} Grade</button>`;
+    if(!showControls) return pill;
+    return `<span class="grade-pill-group">${pill}<button class="grade-icon-btn" data-action="rename" data-grade="${escapeAttr(g)}" title="Rename grade">✏️</button><button class="grade-icon-btn" data-action="delete" data-grade="${escapeAttr(g)}" title="Delete grade">✕</button></span>`;
+  }).join('');
+  if(showControls){
+    html += `<button class="grade-pill add-grade-pill" id="addGradeBtn" title="Add a new grade">+ Add Grade</button>`;
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('.grade-pill:not(.add-grade-pill)').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      gradeFilter = btn.dataset.grade;
+      renderAll();
+    });
+  });
+  el.querySelectorAll('.grade-icon-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const grade = e.currentTarget.dataset.grade;
+      if(e.currentTarget.dataset.action === 'rename'){
+        renameGrade(grade);
+      } else {
+        deleteGrade(grade);
+      }
+    });
+  });
+  const addBtn = document.getElementById('addGradeBtn');
+  if(addBtn) addBtn.addEventListener('click', addGrade);
+}
+
+function gradeOptionsHtml(selected){
+  return GRADES.map(g => `<option value="${g}" ${g === selected ? 'selected' : ''}>${g} Grade</option>`).join('');
+}
+
+/* ---------------- Roster (Store tab, editable) ---------------- */
+function renderRoster(){
+  renderGradeFilter('storeGradeFilter', true);
+  const bar = document.getElementById('rosterBar');
+  const visible = filteredStudents();
+
+  if(visible.length === 0 && !studentsEditMode){
+    bar.innerHTML = `<div class="empty-roster">${students.length === 0 ? 'No students yet. Click "Manage Students" to add your first one.' : 'No students in this grade yet.'}</div>`;
+    return;
+  }
+
+  let html = visible.map(s => `
+    <div class="student-chip ${s.id === activeStudentId ? 'active' : ''}" data-id="${s.id}">
+      <button class="chip-del" data-id="${s.id}" title="Remove student">✕</button>
+      <div class="chip-avatar">${initials(s.name)}</div>
+      <div class="chip-info">
+        <div class="chip-name" contenteditable="${studentsEditMode}" data-field="name" data-id="${s.id}">${escapeHtml(s.name)}</div>
+        <div class="chip-balance${debtClass(s.balance)}">🪙 <span contenteditable="${studentsEditMode}" data-field="balance" data-id="${s.id}">${s.balance}</span></div>
+        ${studentsEditMode
+          ? `<select class="chip-grade-select" data-id="${s.id}">${gradeOptionsHtml(s.grade)}</select>`
+          : `<span class="chip-grade-badge">${s.grade}</span>`}
+      </div>
+      <button class="gift-btn" data-id="${s.id}" title="Give or take points">🎁</button>
+    </div>
+  `).join('');
+
+  html += `<div class="add-chip" id="addChip"><span class="plus">+</span><span>Add Student</span></div>`;
+
+  bar.innerHTML = html;
+
+  bar.querySelectorAll('.student-chip').forEach(chip=>{
+    chip.addEventListener('click', (e)=>{
+      if(e.target.closest('.chip-del')) return;
+      if(e.target.hasAttribute('contenteditable')) return;
+      if(e.target.tagName === 'SELECT') return;
+      activeStudentId = chip.dataset.id;
+      persist();
+      renderAll();
+    });
+  });
+
+  bar.querySelectorAll('.chip-del').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = e.currentTarget.dataset.id;
+      const s = getStudent(id);
+      if(!confirm(`Remove ${s ? s.name : 'this student'}? Their saved points and inventory will be lost.`)) return;
+      students = students.filter(st => st.id !== id);
+      if(activeStudentId === id){
+        activeStudentId = students[0] ? students[0].id : null;
+      }
+      persist();
+      renderAll();
+    });
+  });
+
+  bar.querySelectorAll('[contenteditable][data-field]').forEach(el=>{
+    el.addEventListener('click', e => e.stopPropagation());
+    el.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); e.target.blur(); } });
+    el.addEventListener('blur', (e)=>{
+      const id = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const s = getStudent(id);
+      if(!s) return;
+      let val = e.target.textContent.trim();
+      if(field === 'balance'){
+        s.balance = Number(val.replace(/[^0-9.\-]/g,'')) || 0;
+      } else {
+        s.name = val || 'Student';
+      }
+      persist();
+      renderAll();
+    });
+  });
+
+  bar.querySelectorAll('.chip-grade-select').forEach(sel=>{
+    sel.addEventListener('click', e => e.stopPropagation());
+    sel.addEventListener('change', (e)=>{
+      const id = e.target.dataset.id;
+      const s = getStudent(id);
+      if(!s) return;
+      s.grade = e.target.value;
+      persist();
+      renderAll();
+    });
+  });
+
+  const addChip = document.getElementById('addChip');
+  if(addChip){
+    addChip.addEventListener('click', ()=>{
+      const s = normalizeStudent({ name: 'New Student', grade: gradeFilter !== 'all' ? gradeFilter : GRADES[0] });
+      students.push(s);
+      activeStudentId = s.id;
+      persist();
+      renderAll();
+      requestAnimationFrame(()=>{
+        const names = document.querySelectorAll('.chip-name');
+        const last = names[names.length - 1];
+        if(last){ last.focus(); document.execCommand('selectAll', false, null); }
+      });
+    });
+  }
+
+  bar.querySelectorAll('.gift-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openPointsModal('single', e.currentTarget.dataset.id);
+    });
+  });
+}
+
+/* ---------------- Roster (Wheel tab, pick-only) ---------------- */
+function renderWheelRoster(){
+  renderGradeFilter('wheelGradeFilter');
+  const bar = document.getElementById('wheelRosterBar');
+  const visible = filteredStudents();
+
+  if(visible.length === 0){
+    bar.innerHTML = `<div class="empty-roster">${students.length === 0 ? 'No students yet — add them from the Store tab.' : 'No students in this grade.'}</div>`;
+    return;
+  }
+
+  bar.innerHTML = visible.map(s => `
+    <div class="student-chip ${s.id === activeStudentId ? 'active' : ''}" data-id="${s.id}">
+      <div class="chip-avatar">${initials(s.name)}</div>
+      <div class="chip-info">
+        <div class="chip-name">${escapeHtml(s.name)}</div>
+        <div class="chip-balance${debtClass(s.balance)}">🪙 ${formatPrice(s.balance)}</div>
+        <span class="chip-grade-badge">${s.grade}</span>
+      </div>
+    </div>
+  `).join('');
+
+  bar.querySelectorAll('.student-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      activeStudentId = chip.dataset.id;
+      persist();
+      renderAll();
+    });
+  });
+}
+
+/* ---------------- Points modal (give/take points) ---------------- */
+let pointsModalMode = null;   // 'single' | 'all'
+let pointsModalStudentId = null;
+
+function openPointsModal(mode, studentId){
+  pointsModalMode = mode;
+  pointsModalStudentId = studentId || null;
+  const title = document.getElementById('pointsModalTitle');
+  const gradeField = document.getElementById('pointsModalGradeField');
+  const gradeSelect = document.getElementById('pointsModalGradeSelect');
+
+  if(mode === 'all'){
+    title.textContent = 'Give points to everyone';
+    gradeField.style.display = '';
+    const defaultGrade = gradeFilter !== 'all' ? gradeFilter : 'all';
+    gradeSelect.innerHTML = `<option value="all">All Grades</option>` +
+      GRADES.map(g => `<option value="${g}" ${g === defaultGrade ? 'selected' : ''}>${g} Grade</option>`).join('');
+  } else {
+    const s = getStudent(studentId);
+    title.textContent = `Give points to ${s ? s.name : 'student'}`;
+    gradeField.style.display = 'none';
+  }
+  const input = document.getElementById('pointsModalInput');
+  input.value = '';
+  document.getElementById('pointsModalOverlay').classList.add('show');
+  requestAnimationFrame(()=> input.focus());
+}
+
+function closePointsModal(){
+  document.getElementById('pointsModalOverlay').classList.remove('show');
+  pointsModalMode = null;
+  pointsModalStudentId = null;
+}
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function logDeduction(studentId, studentName, amount){
+  transactions.push({ id: uid(), date: todayStr(), studentId, studentName, amount, timestamp: Date.now() });
+}
+
+function applyPointsModal(){
+  const raw = document.getElementById('pointsModalInput').value;
+  const amount = Number(raw);
+  if(!raw || Number.isNaN(amount) || amount === 0){ closePointsModal(); return; }
+
+  if(pointsModalMode === 'single'){
+    const s = getStudent(pointsModalStudentId);
+    if(s){
+      s.balance = s.balance + amount;
+      if(amount < 0) logDeduction(s.id, s.name, amount);
+    }
+  } else if(pointsModalMode === 'all'){
+    const targetGrade = document.getElementById('pointsModalGradeSelect').value;
+    const targets = targetGrade === 'all' ? students : students.filter(s => s.grade === targetGrade);
+    targets.forEach(s => {
+      s.balance = s.balance + amount;
+      if(amount < 0) logDeduction(s.id, s.name, amount);
+    });
+  }
+  persist(true);
+  renderAll();
+  closePointsModal();
+}
+
+document.getElementById('pointsModalCancel').addEventListener('click', closePointsModal);
+document.getElementById('pointsModalApply').addEventListener('click', applyPointsModal);
+document.getElementById('pointsModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'pointsModalOverlay') closePointsModal();
+});
+document.getElementById('pointsModalInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); applyPointsModal(); }
+  if(e.key === 'Escape'){ e.preventDefault(); closePointsModal(); }
+});
+document.getElementById('giveAllBtn').addEventListener('click', ()=> openPointsModal('all', null));
+
+/* ---------------- Shopper banner ---------------- */
+function renderBanner(){
+  const el = document.getElementById('shopperBanner');
+  const s = getStudent(activeStudentId);
+  if(!s){
+    el.className = 'shopper-banner none';
+    el.innerHTML = students.length
+      ? `Select a student above to start shopping.`
+      : `Add a student above, then select them here to start shopping.`;
+    return;
+  }
+  el.className = 'shopper-banner';
+  el.innerHTML = `
+    <div class="who">Shopping as <span class="name">${escapeHtml(s.name)}</span></div>
+    <div class="bal${debtClass(s.balance)}">🪙 ${formatPrice(s.balance)} points <button class="ghost" id="bannerGiftBtn" style="margin-left:6px;padding:5px 12px;font-size:11.5px;">🎁 Give Points</button></div>
+  `;
+  const btn = document.getElementById('bannerGiftBtn');
+  if(btn) btn.addEventListener('click', ()=> openPointsModal('single', s.id));
+}
+
+/* ---------------- Store grid ---------------- */
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const s = getStudent(activeStudentId);
+
+  items.filter(it => !it.hidden).forEach((item) => {
+    const affordable = !!s && s.balance >= item.price;
+    const owned = s ? (s.inventory[item.id] || 0) : 0;
+
+    const ticket = document.createElement('div');
+    ticket.className = 'ticket' + (s && !affordable ? ' unaffordable' : '');
+
+    ticket.innerHTML = `
+      <button class="del-btn" title="Remove item" data-id="${item.id}">✕</button>
+      <div class="ticket-main">
+        <div class="item-name" contenteditable="${editMode}" data-field="name" data-id="${item.id}">${escapeHtml(item.name)}</div>
+        <div class="item-note" contenteditable="${editMode}" data-field="note" data-id="${item.id}">${escapeHtml(item.note||'')}</div>
+        ${owned > 0 ? `<span class="owned-tag">owned × ${owned}</span>` : ''}
+      </div>
+      <div class="perforation"></div>
+      <div class="ticket-stub">
+        <span class="stub-label">Cost</span>
+        <div class="price-value" contenteditable="${editMode}" data-field="price" data-id="${item.id}">${formatPrice(item.price)}</div>
+        <span class="price-unit">points</span>
+        <button class="buy-btn" data-id="${item.id}" ${(!s || !affordable) ? 'disabled' : ''}>
+          ${!s ? 'Select student' : (affordable ? 'Buy' : 'Locked')}
+        </button>
+      </div>
+    `;
+    grid.appendChild(ticket);
+  });
+
+  const addTicket = document.createElement('div');
+  addTicket.className = 'add-ticket';
+  addTicket.id = 'addTicket';
+  addTicket.innerHTML = `<span class="plus">+</span><span>Add Reward</span>`;
+  grid.appendChild(addTicket);
+
+  attachGridListeners();
+}
+
+function attachGridListeners(){
+  document.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      items = items.filter(i => i.id !== id);
+      persist();
+      renderAll();
+    });
+  });
+
+  document.querySelectorAll('.buy-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      buyItem(e.currentTarget.dataset.id);
+    });
+  });
+
+  document.querySelectorAll('[contenteditable][data-field]').forEach(el=>{
+    el.addEventListener('blur', (e)=>{
+      const id = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const item = items.find(i => i.id === id);
+      if(!item) return;
+      let val = e.target.textContent.trim();
+      if(field === 'price'){
+        item.price = Number(val.replace(/[^0-9.]/g,'')) || 0;
+      } else {
+        item[field] = val;
+      }
+      persist();
+      renderAll();
+    });
+    el.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); e.target.blur(); }
+    });
+  });
+
+  const addTicket = document.getElementById('addTicket');
+  if(addTicket){
+    addTicket.addEventListener('click', ()=>{
+      items.push({ id: uid(), name: 'New Reward', price: 0, note: '', weight: 10 });
+      persist();
+      renderAll();
+      requestAnimationFrame(()=>{
+        const names = document.querySelectorAll('.item-name');
+        const last = names[names.length-1];
+        if(last){ last.focus(); document.execCommand('selectAll',false,null); }
+      });
+    });
+  }
+}
+
+function buyItem(itemId){
+  const s = getStudent(activeStudentId);
+  const item = items.find(i => i.id === itemId);
+  if(!s || !item) return;
+  if(s.balance < item.price) return;
+  s.balance -= item.price;
+  s.inventory[itemId] = (s.inventory[itemId] || 0) + 1;
+  persist();
+  renderAll();
+}
+
+/* ---------------- Inventory ---------------- */
+function renderInventory(){
+  const wrap = document.getElementById('inventoryWrap');
+  const s = getStudent(activeStudentId);
+
+  if(!s){
+    wrap.innerHTML = `<div class="empty-inv">Select a student to see what they've bought.</div>`;
+    return;
+  }
+
+  const owned = Object.entries(s.inventory || {}).filter(([, qty]) => qty > 0);
+  if(owned.length === 0){
+    wrap.innerHTML = `<div class="empty-inv">${escapeHtml(s.name)} hasn't bought anything yet.</div>`;
+    return;
+  }
+
+  const cards = owned.map(([itemId, qty]) => {
+    const item = items.find(i => i.id === itemId);
+    const name = item ? item.name : '(removed reward)';
+    return `
+      <div class="inv-card">
+        <div class="inv-top">
+          <div class="inv-name">${escapeHtml(name)}</div>
+          <div class="inv-qty">× ${qty}</div>
+        </div>
+        <div class="inv-actions">
+          <button class="ghost use-btn" data-id="${itemId}">Use one</button>
+          <button class="danger-ghost refund-btn" data-id="${itemId}" ${item && !item.hidden ? '' : 'disabled'}>Return &amp; refund</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.innerHTML = `<div class="inventory-grid">${cards}</div>`;
+
+  wrap.querySelectorAll('.use-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      const st = getStudent(activeStudentId);
+      if(!st || !st.inventory[id]) return;
+      st.inventory[id] -= 1;
+      if(st.inventory[id] <= 0) delete st.inventory[id];
+      persist();
+      renderAll();
+    });
+  });
+
+  wrap.querySelectorAll('.refund-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      const st = getStudent(activeStudentId);
+      const item = items.find(i => i.id === id);
+      if(!st || !item || !st.inventory[id]) return;
+      st.inventory[id] -= 1;
+      if(st.inventory[id] <= 0) delete st.inventory[id];
+      st.balance += item.price;
+      persist();
+      renderAll();
+    });
+  });
+}
+
+function renderAll(){
+  document.body.classList.toggle('edit-mode', editMode);
+  document.body.classList.toggle('students-edit-mode', studentsEditMode);
+  document.body.classList.toggle('prizes-edit-mode', prizesEditMode);
+  renderRoster();
+  renderBanner();
+  renderGrid();
+  renderInventory();
+  renderWheelRoster();
+  renderWheelBanner();
+  renderPrizeEditor();
+  renderHalloweenToggle();
+  renderChristmas();
+  renderWheel();
+}
+
+/* ---------------- Toolbar ---------------- */
+document.getElementById('editToggle').addEventListener('click', ()=>{
+  editMode = !editMode;
+  document.getElementById('editToggle').textContent = editMode ? '✅ Done Editing' : '✏️ Edit Store';
+  renderAll();
+});
+
+document.getElementById('studentsToggle').addEventListener('click', ()=>{
+  studentsEditMode = !studentsEditMode;
+  document.getElementById('studentsToggle').textContent = studentsEditMode ? '✅ Done Managing' : '👥 Manage Students';
+  renderAll();
+});
+
+document.getElementById('saveBtn').addEventListener('click', ()=> persist(true));
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(currentState(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'point-store-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(Array.isArray(parsed.items)){
+        GRADES = (Array.isArray(parsed.grades) && parsed.grades.length) ? parsed.grades.slice() : DEFAULT_GRADES.slice();
+        items = withIds(parsed.items);
+        students = (parsed.students || []).map(normalizeStudent);
+        prizes = withPrizeIds(parsed.prizes && parsed.prizes.length ? parsed.prizes : DEFAULT_PRIZES);
+        luckyPrizes = withPrizeIds(parsed.luckyPrizes && parsed.luckyPrizes.length ? parsed.luckyPrizes : DEFAULT_LUCKY_PRIZES);
+        luckyWheelChance = Number.isFinite(parsed.luckyWheelChance) ? Math.max(0, Math.min(100, parsed.luckyWheelChance)) : 10;
+        applyHalloweenState(parsed);
+        if(!halloweenInitialized){ getCandyItem(); halloweenInitialized = true; }
+        transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+        activeStudentId = parsed.activeStudentId || (students[0] ? students[0].id : null);
+        currentWheelPool = wheelPoolFor(activePrizeTab);
+        persist(true);
+        renderAll();
+      } else {
+        alert('That file does not look like a Point Store backup.');
+      }
+    }catch(err){
+      alert('Could not read that file.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+/* ---------------- View tabs ---------------- */
+document.getElementById('tabStoreBtn').addEventListener('click', ()=> switchView('store'));
+document.getElementById('tabWheelBtn').addEventListener('click', ()=> switchView('wheel'));
+
+function switchView(view){
+  activeView = view;
+  document.getElementById('storeView').style.display = view === 'store' ? '' : 'none';
+  document.getElementById('wheelView').style.display = view === 'wheel' ? '' : 'none';
+  document.getElementById('storeToolbar').style.display = view === 'store' ? '' : 'none';
+  document.getElementById('tabStoreBtn').classList.toggle('active', view === 'store');
+  document.getElementById('tabWheelBtn').classList.toggle('active', view === 'wheel');
+}
+
+/* ---------------- Wheel shopper banner ---------------- */
+function renderWheelBanner(){
+  const el = document.getElementById('wheelShopperBanner');
+  const s = getStudent(activeStudentId);
+  if(!s){
+    el.className = 'shopper-banner none';
+    el.innerHTML = students.length
+      ? `Select a student in the Store tab to spin for them.`
+      : `Add a student in the Store tab first, then come back to spin.`;
+    return;
+  }
+  el.className = 'shopper-banner';
+  el.innerHTML = `
+    <div class="who">Spinning for <span class="name">${escapeHtml(s.name)}</span></div>
+    <div class="bal${debtClass(s.balance)}">🪙 ${formatPrice(s.balance)} points</div>
+  `;
+}
+
+/* ---------------- Prize editor ---------------- */
+document.getElementById('prizesToggle').addEventListener('click', ()=>{
+  prizesEditMode = !prizesEditMode;
+  document.getElementById('prizesToggle').textContent = prizesEditMode ? '✅ Done Editing' : '✏️ Edit Prizes';
+  renderAll();
+});
+
+function poolForTab(tab){
+  const t = tab || activePrizeTab;
+  if(t === 'lucky') return luckyPrizes;
+  if(t === 'halloween') return halloweenPrizes;
+  if(t === 'christmas') return christmasPrizes;
+  if(t === 'presents') return presentPrizes;
+  if(t === 'naughty') return naughtyPrizes;
+  return prizes;
+}
+/** The Presents tab edits what's inside presents, but the wheel preview stays on the Christmas wheel. */
+function wheelPoolFor(tab){
+  return (tab || activePrizeTab) === 'presents' ? christmasPrizes : poolForTab(tab);
+}
+function getPrizeList(tab){ return poolForTab(tab); }
+function setPrizeList(tab, list){
+  const t = tab || activePrizeTab;
+  if(t === 'lucky') luckyPrizes = list;
+  else if(t === 'halloween') halloweenPrizes = list;
+  else if(t === 'christmas') christmasPrizes = list;
+  else if(t === 'presents') presentPrizes = list;
+  else if(t === 'naughty') naughtyPrizes = list;
+  else prizes = list;
+}
+function colorsForPool(pool){
+  if(pool === halloweenPrizes) return HALLOWEEN_COLORS;
+  if(pool === christmasPrizes || pool === presentPrizes) return CHRISTMAS_COLORS;
+  return WHEEL_COLORS;
+}
+/** A prize's own color if you picked one, otherwise the wheel's default palette color for its position. */
+function sliceColor(pool, idx){
+  const palette = colorsForPool(pool);
+  return (pool[idx] && pool[idx].color) || (pool === naughtyPrizes ? naughtyColor(pool[idx], idx) : palette[idx % palette.length]);
+}
+
+function setPrizeTab(tab){
+  activePrizeTab = tab;
+  currentWheelPool = wheelPoolFor(tab);
+  document.getElementById('normalWheelTabBtn').classList.toggle('active', tab === 'normal');
+  document.getElementById('luckyWheelTabBtn').classList.toggle('active', tab === 'lucky');
+  document.getElementById('halloweenWheelTabBtn').classList.toggle('active', tab === 'halloween');
+  document.getElementById('christmasWheelTabBtn').classList.toggle('active', tab === 'christmas');
+  document.getElementById('presentsTabBtn').classList.toggle('active', tab === 'presents');
+  document.getElementById('naughtyTabBtn').classList.toggle('active', tab === 'naughty');
+  renderAll();
+}
+document.getElementById('normalWheelTabBtn').addEventListener('click', ()=> setPrizeTab('normal'));
+document.getElementById('luckyWheelTabBtn').addEventListener('click', ()=> setPrizeTab('lucky'));
+document.getElementById('halloweenWheelTabBtn').addEventListener('click', ()=> setPrizeTab('halloween'));
+document.getElementById('christmasWheelTabBtn').addEventListener('click', ()=> setPrizeTab('christmas'));
+document.getElementById('presentsTabBtn').addEventListener('click', ()=> setPrizeTab('presents'));
+document.getElementById('naughtyTabBtn').addEventListener('click', ()=> setPrizeTab('naughty'));
+
+function renderHalloweenToggle(){
+  const btn = document.getElementById('halloweenToggleBtn');
+  btn.textContent = halloweenMode ? '🎃 Halloween Mode: On' : '🎃 Halloween Mode: Off';
+  btn.classList.toggle('on', halloweenMode);
+  const stashBtn = document.getElementById('webStashBtn');
+  stashBtn.textContent = `🕸️ Web Stash: ${formatPrice(webStash)}`;
+  stashBtn.style.display = (halloweenMode || webStash > 0) ? '' : 'none';
+}
+document.getElementById('webStashBtn').addEventListener('click', ()=>{
+  const val = prompt('Set the Web Stash (store points waiting to be won):', String(webStash));
+  if(val === null) return;
+  const n = Math.max(0, Math.round(Number(val)));
+  if(Number.isNaN(n)) return;
+  webStash = n;
+  persist(true);
+  renderAll();
+});
+document.getElementById('halloweenToggleBtn').addEventListener('click', ()=>{
+  halloweenMode = !halloweenMode;
+  if(halloweenMode){ christmasMode = false; naughtyMode = false; } // one special wheel at a time
+  persist();
+  setPrizeTab(halloweenMode ? 'halloween' : 'normal');
+});
+document.getElementById('naughtyToggleBtn').addEventListener('click', ()=>{
+  naughtyMode = !naughtyMode;
+  if(naughtyMode){ halloweenMode = false; christmasMode = false; } // one special wheel at a time
+  persist();
+  setPrizeTab(naughtyMode ? 'naughty' : 'normal');
+});
+function renderNaughtyToggle(){
+  const btn = document.getElementById('naughtyToggleBtn');
+  btn.textContent = naughtyMode ? '😈 Naughty Wheel: On' : '😈 Naughty Wheel: Off';
+  btn.classList.toggle('on', naughtyMode);
+}
+document.getElementById('christmasToggleBtn').addEventListener('click', ()=>{
+  christmasMode = !christmasMode;
+  if(christmasMode){ halloweenMode = false; naughtyMode = false; } // one special wheel at a time
+  persist();
+  setPrizeTab(christmasMode ? 'christmas' : 'normal');
+});
+
+document.getElementById('luckyChanceInput').addEventListener('change', (e)=>{
+  const val = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+  luckyWheelChance = val;
+  e.target.value = val;
+  persist();
+});
+
+document.getElementById('addPrizeBtn').addEventListener('click', ()=>{
+  if(activePrizeTab === 'naughty'){
+    naughtyPrizes.push({ id: uid(), label: '−20 points', points: 20, percent: 0, itemId: 'NAUGHTY_FLAT', color: null });
+    equalizeNaughty();
+  } else {
+    getPrizeList().push({ id: uid(), label: 'New Prize', points: 10, percent: 5, itemId: null });
+  }
+  persist();
+  renderAll();
+  requestAnimationFrame(()=>{
+    const names = document.querySelectorAll('.prize-name');
+    const last = names[names.length - 1];
+    if(last){ last.focus(); last.select(); }
+  });
+});
+
+function renderNaughtyEditor(){
+  const list = document.getElementById('prizeList');
+  const totalEl = document.getElementById('prizeTotal');
+  const n = naughtyPrizes.length;
+  totalEl.textContent = n ? `equal odds — each slice ${Math.round(10000 / n) / 100}%` : '';
+  totalEl.classList.remove('warn');
+  const typeOptions = sel => [['NAUGHTY_SAVED', '😇 Saved (nothing happens)'], ['NAUGHTY_FLAT', 'Lose flat points (max 100)'], ['NAUGHTY_PCT', 'Lose % of balance (max 50%)']]
+    .map(([v, l]) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
+  const typeTag = { NAUGHTY_SAVED: '😇 Saved', NAUGHTY_FLAT: 'Flat loss', NAUGHTY_PCT: '% loss' };
+  list.innerHTML = naughtyPrizes.map((pr, idx) => `
+    <div class="prize-row">
+      ${prizesEditMode
+        ? `<input type="color" class="prize-color-input" value="${sliceColor(naughtyPrizes, idx)}" data-id="${pr.id}" data-nfield="color" title="Change this slice's color">${pr.color ? `<button class="prize-color-reset" data-id="${pr.id}" data-nfield="reset" title="Back to the default color">↺</button>` : ''}`
+        : `<span class="prize-swatch" style="background:${sliceColor(naughtyPrizes, idx)}"></span>`}
+      <input class="prize-name" type="text" value="${escapeAttr(pr.label)}" data-id="${pr.id}" data-nfield="label" ${prizesEditMode ? '' : 'disabled'}>
+      ${prizesEditMode
+        ? `<select class="prize-item-select" data-id="${pr.id}" data-nfield="type">${typeOptions(pr.itemId)}</select>`
+        : `<span class="prize-item-tag">${typeTag[pr.itemId]}</span>`}
+      ${pr.itemId === 'NAUGHTY_SAVED' ? '' : `<div class="prize-field"><label>${pr.itemId === 'NAUGHTY_PCT' ? '% lost' : 'Pts lost'}</label><input type="number" min="1" max="${pr.itemId === 'NAUGHTY_PCT' ? NAUGHTY_MAX_PCT : NAUGHTY_MAX_FLAT}" value="${pr.points}" data-id="${pr.id}" data-nfield="amount" ${prizesEditMode ? '' : 'disabled'}></div>`}
+      <button class="prize-del" data-id="${pr.id}" data-nfield="delete" title="Remove slice">✕</button>
+    </div>`).join('');
+
+  const done = () => { equalizeNaughty(); persist(); renderAll(); };
+  list.querySelectorAll('[data-nfield]').forEach(el => {
+    const evt = (el.tagName === 'BUTTON') ? 'click' : 'change';
+    el.addEventListener(evt, (e) => {
+      const pr = naughtyPrizes.find(x => x.id === el.dataset.id);
+      if(!pr) return;
+      const field = el.dataset.nfield;
+      const wasAuto = pr.label === naughtyLabel(pr); // keep custom names; refresh auto-generated ones
+      if(field === 'delete'){
+        if(naughtyPrizes.length <= 1) return;
+        naughtyPrizes = naughtyPrizes.filter(x => x.id !== pr.id);
+      } else if(field === 'label'){
+        pr.label = el.value.trim() || naughtyLabel(pr);
+      } else if(field === 'type'){
+        pr.itemId = el.value;
+        const max = pr.itemId === 'NAUGHTY_PCT' ? NAUGHTY_MAX_PCT : NAUGHTY_MAX_FLAT;
+        pr.points = pr.itemId === 'NAUGHTY_SAVED' ? 0 : Math.max(1, Math.min(max, pr.points || (pr.itemId === 'NAUGHTY_PCT' ? 20 : 25)));
+        if(wasAuto) pr.label = naughtyLabel(pr);
+      } else if(field === 'amount'){
+        const max = pr.itemId === 'NAUGHTY_PCT' ? NAUGHTY_MAX_PCT : NAUGHTY_MAX_FLAT;
+        pr.points = Math.max(1, Math.min(max, Math.round(Number(el.value)) || 1));
+        if(wasAuto) pr.label = naughtyLabel(pr);
+      } else if(field === 'color'){
+        pr.color = /^#[0-9a-f]{6}$/i.test(el.value) ? el.value : null;
+      } else if(field === 'reset'){
+        pr.color = null;
+      }
+      done();
+    });
+  });
+}
+
+function renderPrizeEditor(){
+  const list = document.getElementById('prizeList');
+  const totalEl = document.getElementById('prizeTotal');
+  const currentList = getPrizeList();
+
+  document.getElementById('luckyChanceInput').value = luckyWheelChance;
+  const tabHint = document.getElementById('prizeTabHint');
+  tabHint.style.display = (activePrizeTab === 'presents' || activePrizeTab === 'naughty') ? '' : 'none';
+  if(activePrizeTab === 'naughty'){ tabHint.textContent = NAUGHTY_HINT; renderNaughtyEditor(); return; }
+  tabHint.textContent = 'These are the prizes inside the three presents (the 🎁 Open a Present wheel slice opens them). Buffs are not used up by presents. An Elf Helper is saved until the student chooses to use it.';
+
+  const total = currentList.reduce((sum,p)=> sum + Math.max(0, p.percent), 0);
+  totalEl.textContent = `adds up to ${total}%${total !== 100 ? ' (auto-scaled to 100% when you spin)' : ''}`;
+  totalEl.classList.toggle('warn', total !== 100);
+
+  const poolColors = colorsForPool(currentList);
+  const itemOptions = `<option value="">— points only —</option>` +
+    `<option value="CANDY">🍬 Candy</option>` +
+    `<option value="RANDOM">🎲 Random Item (weighted by price)</option>` +
+    ((activePrizeTab === 'christmas' || activePrizeTab === 'presents') ? `<option value="ORNAMENT">🎄 Add an ornament to the class tree</option><option value="SNOWMAN">⛄ Snowman piece</option>${activePrizeTab === 'christmas' ? '<option value="PRESENT">🎁 Open a Present (pick 1 of 3)</option>' : ''}<option value="BUFF_DOUBLE">✨ Elf Helper (next prize ×2)</option><option value="BUFF_COCOA">☕ Hot Cocoa (+${COCOA_BONUS} on next ${COCOA_CHARGES} wins)</option><option value="SPIRIT">🌟 Christmas Spirit (snowman piece + ornament)</option>${activePrizeTab === 'presents' ? '<option value="RANDOM_POINTS">💰 Random Store Points (100–1000)</option><option value="RANDOM_CAPPED">🎲 Random item (only items up to 10,000 pts)</option>' : ''}${activePrizeTab === 'presents' ? '<option value="ULTIMATE">🎓 Ultimate Present: Skip the Final Test (unique, win-only)</option>' : ''}` : '') +
+    (activePrizeTab === 'halloween' ? `<option value="WEB">🕸️ Lose everything won so far (points go to the Web Stash)</option><option value="STASH">🕸️ Web Stash (collect the pot)</option>` : '') +
+    items.filter(it => !it.hidden).map(it => `<option value="${it.id}">${escapeHtml(it.name)}</option>`).join('');
+
+  function itemTagHtml(p){
+    if(p.itemId === 'RANDOM') return `<span class="prize-item-tag">🎲 Random Item</span>`;
+    if(p.itemId === 'RANDOM_POINTS') return `<span class="prize-item-tag">💰 100–1000 pts</span>`;
+    if(p.itemId === 'RANDOM_CAPPED') return `<span class="prize-item-tag">🎲 Random Item ≤10k</span>`;
+    if(p.itemId === 'CANDY') return `<span class="prize-item-tag">🍬 Candy</span>`;
+    if(p.itemId === 'WEB') return `<span class="prize-item-tag">🕸️ Wipes winnings</span>`;
+    if(p.itemId === 'STASH') return `<span class="prize-item-tag">🕸️ Web Stash</span>`;
+    const XMAS_TAGS = { ORNAMENT:'🎄 Ornament', SNOWMAN:'⛄ Snowman piece', PRESENT:'🎁 Present', BUFF_DOUBLE:'✨ Elf Helper', BUFF_COCOA:'☕ Hot Cocoa', SPIRIT:'🌟 Christmas Spirit', RANDOM_CAPPED:'🎲 Random item ≤10k', RANDOM_POINTS:'💰 100–1000 pts', ULTIMATE:'🎓 Skip the Final Test' };
+    if(XMAS_TAGS[p.itemId]) return `<span class="prize-item-tag">${XMAS_TAGS[p.itemId]}</span>`;
+    const item = p.itemId ? items.find(it => it.id === p.itemId) : null;
+    return item ? `<span class="prize-item-tag">🎁 ${escapeHtml(item.name)}</span>` : '';
+  }
+
+  list.innerHTML = currentList.map((p, idx) => `
+    <div class="prize-row">
+      ${prizesEditMode
+        ? `<input type="color" class="prize-color-input" value="${sliceColor(currentList, idx)}" data-id="${p.id}" data-field="color" title="Change this slice's color">${p.color ? `<button class="prize-color-reset" data-id="${p.id}" title="Back to the default color">↺</button>` : ''}`
+        : `<span class="prize-swatch" style="background:${sliceColor(currentList, idx)}"></span>`}
+      <input class="prize-name" type="text" value="${escapeAttr(p.label)}" data-id="${p.id}" data-field="label" ${prizesEditMode ? '' : 'disabled'}>
+      <div class="prize-field">
+        <label>Pts</label>
+        <input type="number" value="${p.points}" data-id="${p.id}" data-field="points" ${prizesEditMode ? '' : 'disabled'}>
+      </div>
+      <div class="prize-field">
+        <label>%</label>
+        <input type="number" value="${p.percent}" data-id="${p.id}" data-field="percent" ${prizesEditMode ? '' : 'disabled'}>
+      </div>
+      ${prizesEditMode
+        ? `<select class="prize-item-select" data-id="${p.id}" data-field="itemId">${itemOptions}</select>`
+        : itemTagHtml(p)}
+      <button class="prize-del" data-id="${p.id}" title="Remove prize">✕</button>
+    </div>
+  `).join('');
+
+  if(prizesEditMode){
+    list.querySelectorAll('.prize-item-select').forEach(sel=>{
+      const p = currentList.find(pr => pr.id === sel.dataset.id);
+      if(p) sel.value = p.itemId || '';
+    });
+  }
+
+  list.querySelectorAll('input[data-field]').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const id = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const prize = getPrizeList().find(p => p.id === id);
+      if(!prize) return;
+      if(field === 'label'){
+        prize.label = e.target.value.trim() || 'Prize';
+      } else if(field === 'points'){
+        prize.points = Math.max(0, Number(e.target.value) || 0);
+      } else if(field === 'percent'){
+        prize.percent = Math.max(0, Number(e.target.value) || 0);
+      } else if(field === 'color'){
+        prize.color = /^#[0-9a-f]{6}$/i.test(e.target.value) ? e.target.value : null;
+      }
+      persist();
+      renderAll();
+    });
+  });
+
+  list.querySelectorAll('.prize-color-reset').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const prize = getPrizeList().find(p => p.id === e.currentTarget.dataset.id);
+      if(!prize) return;
+      prize.color = null;
+      persist();
+      renderAll();
+    });
+  });
+
+  list.querySelectorAll('select[data-field="itemId"]').forEach(sel=>{
+    sel.addEventListener('change', (e)=>{
+      const id = e.target.dataset.id;
+      const prize = getPrizeList().find(p => p.id === id);
+      if(!prize) return;
+      prize.itemId = e.target.value || null;
+      persist();
+      renderAll();
+    });
+  });
+
+  list.querySelectorAll('.prize-del').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      const currentList2 = getPrizeList();
+      if(currentList2.length <= 1) return;
+      setPrizeList(activePrizeTab, currentList2.filter(p => p.id !== id));
+      persist();
+      renderAll();
+    });
+  });
+}
+
+function escapeAttr(str){
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+/* ---------------- Wheel drawing ---------------- */
+function polarToCartesian(cx, cy, r, angleDeg){
+  const a = (angleDeg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+}
+
+function describeSlice(cx, cy, r, startAngle, endAngle){
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = (endAngle - startAngle) <= 180 ? "0" : "1";
+  return `M ${cx} ${cy} L ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x.toFixed(2)} ${end.y.toFixed(2)} Z`;
+}
+
+function getSliceBounds(pool){
+  const list = pool || currentWheelPool || prizes;
+  const total = list.reduce((sum,p)=> sum + Math.max(0, p.percent), 0) || 1;
+  let cursor = 0;
+  return list.map(p => {
+    const span = (Math.max(0, p.percent) / total) * 360;
+    const bounds = { start: cursor, end: cursor + span, mid: cursor + span / 2, prize: p };
+    cursor += span;
+    return bounds;
+  });
+}
+
+function renderWheel(pool){
+  const list = pool || currentWheelPool || prizes;
+  const group = document.getElementById('wheelGroup');
+  const cx = 160, cy = 160, r = 150;
+
+  if(list.length === 0){
+    group.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--surface)" stroke="var(--line)"></circle>`;
+    return;
+  }
+
+  const bounds = getSliceBounds(list);
+  const palette = colorsForPool(list);
+  let svg = '';
+
+  bounds.forEach((b, idx) => {
+    const color = b.prize.color || (list === naughtyPrizes ? naughtyColor(b.prize, idx) : palette[idx % palette.length]);
+    if(b.end > b.start){
+      svg += `<path d="${describeSlice(cx, cy, r, b.start, b.end)}" fill="${color}" stroke="#12142a" stroke-width="2"></path>`;
+    }
+  });
+
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#12142a" stroke-width="4"></circle>`;
+  group.innerHTML = svg;
+}
+
+function escapeXml(str){
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ---------------- Spin logic ---------------- */
+document.getElementById('spinBtn').addEventListener('click', ()=> spinWheel());
+
+function pickPrize(pool){
+  const list = pool || currentWheelPool || prizes;
+  const total = list.reduce((sum,p)=> sum + Math.max(0, p.percent), 0) || 1;
+  let r = Math.random() * total;
+  for(const p of list){
+    r -= Math.max(0, p.percent);
+    if(r <= 0) return p;
+  }
+  return list[list.length - 1];
+}
+
+/**
+ * Weighted random pick among all shop items — cheaper items are more likely,
+ * expensive ones rarer, since weight is inverse to price (min price floor of 1
+ * so free/0-cost items don't produce an infinite weight).
+ */
+function pickRandomShopItem(maxPrice){
+  const pool = items.filter(it => !it.hidden && (maxPrice == null || (Number(it.price) || 0) <= maxPrice)); // the unique win-only item never comes up here
+  if(pool.length === 0) return null;
+  const weights = pool.map(it => Math.max(0, Number(it.weight) || 0));
+  const total = weights.reduce((a,b) => a + b, 0);
+  if(total <= 0) return pool[Math.floor(Math.random() * pool.length)];
+  let r = Math.random() * total;
+  for(let i = 0; i < pool.length; i++){
+    r -= weights[i];
+    if(r <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
+let currentWheelRotation = 0;
+let riskState = null; // { studentId, pot } — tracks an in-progress risk streak
+
+/** Turn a prize's itemId (a real id, 'RANDOM', or 'CANDY') into an actual shop item. */
+function resolvePrizeItem(prize){
+  if(!prize.itemId) return null;
+  if(prize.itemId === 'RANDOM') return pickRandomShopItem();
+  if(prize.itemId === 'CANDY') return getCandyItem();
+  if(prize.itemId === 'ULTIMATE') return getUltimateItem();
+  if(prize.itemId === 'RANDOM_CAPPED') return pickRandomShopItem(RANDOM_CAPPED_MAX_PRICE);
+  if(['WEB', 'STASH', 'ORNAMENT', 'SNOWMAN', 'SPIRIT', 'PRESENT', 'BUFF_DOUBLE', 'BUFF_COCOA', 'NAUGHTY_SAVED', 'NAUGHTY_FLAT', 'NAUGHTY_PCT', 'RANDOM_POINTS'].includes(prize.itemId)) return null;
+  return items.find(it => it.id === prize.itemId) || null;
+}
+
+function shuffled(list){
+  const a = list.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function spinWheel(multiplier, isRiskContinuation){
+  multiplier = Number(multiplier) || 1;
+  isRiskContinuation = !!isRiskContinuation;
+  if(isSpinning) return;
+  const student = getStudent(activeStudentId);
+  if(!student){
+    alert('Select a student in the Store tab first, so we know who to award points to.');
+    return;
+  }
+
+  if(!isRiskContinuation && naughtyMode && naughtyPrizes.length > 0){
+    if(!confirm(`Spin the Naughty Wheel for ${student.name}?`)) return;
+  }
+
+  // Decide which wheel this spin uses. A fresh spin rolls for luck; a risk
+  // continuation stays on whichever wheel the streak started on.
+  if(!isRiskContinuation){
+    currentSpinIsHalloween = halloweenMode && halloweenPrizes.length > 0;
+    currentSpinIsChristmas = !currentSpinIsHalloween && christmasMode && christmasPrizes.length > 0;
+    currentSpinIsNaughty = !currentSpinIsHalloween && !currentSpinIsChristmas && naughtyMode && naughtyPrizes.length > 0;
+    currentSpinIsLucky = !currentSpinIsHalloween && !currentSpinIsChristmas && !currentSpinIsNaughty && luckyPrizes.length > 0 && (Math.random() * 100 < luckyWheelChance);
+  }
+  const spinPool = currentSpinIsNaughty ? naughtyPrizes : currentSpinIsHalloween ? halloweenPrizes : (currentSpinIsChristmas ? christmasPrizes : (currentSpinIsLucky ? luckyPrizes : prizes));
+  if(spinPool.length === 0) return;
+  currentWheelPool = spinPool;
+
+  // Redraw the wheel to match whichever pool is actually being spun.
+  renderWheel(spinPool);
+  const stage = document.getElementById('wheelStage');
+  const banner = document.getElementById('luckyBanner');
+  stage.classList.toggle('lucky-active', currentSpinIsLucky);
+  stage.classList.toggle('halloween-active', currentSpinIsHalloween);
+  stage.classList.toggle('christmas-active', currentSpinIsChristmas);
+  stage.classList.toggle('naughty-active', currentSpinIsNaughty);
+  banner.textContent = currentSpinIsNaughty ? '😈 NAUGHTY LIST 😈' : currentSpinIsHalloween ? '👻 HAUNTED WHEEL! 👻' : (currentSpinIsChristmas ? "🎅 SANTA'S WHEEL! 🎅" : '✨ LUCKY WHEEL! ✨');
+  banner.classList.toggle('halloween', currentSpinIsHalloween);
+  banner.classList.toggle('christmas', currentSpinIsChristmas);
+  banner.classList.toggle('naughty', currentSpinIsNaughty);
+  banner.classList.toggle('show', currentSpinIsLucky || currentSpinIsHalloween || currentSpinIsChristmas || currentSpinIsNaughty);
+
+  const bounds = getSliceBounds(spinPool);
+  const winningPrize = pickPrize(spinPool);
+  const winningBound = bounds.find(b => b.prize.id === winningPrize.id) || bounds[0];
+
+  const span = winningBound.end - winningBound.start;
+  const jitter = span > 4 ? (Math.random() - 0.5) * span * 0.6 : 0;
+  const targetAngle = winningBound.mid + jitter;
+
+  const extraSpins = 6 + Math.floor(Math.random() * 3);
+  const baseRotation = currentWheelRotation - (currentWheelRotation % 360);
+  const neededRotation = (360 - (targetAngle % 360)) % 360;
+  const newRotation = baseRotation + extraSpins * 360 + neededRotation;
+
+  currentWheelRotation = newRotation;
+  isSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const group = document.getElementById('wheelGroup');
+  group.style.transform = `rotate(${newRotation}deg)`;
+
+  const onDone = ()=>{
+    group.removeEventListener('transitionend', onDone);
+    isSpinning = false;
+    document.getElementById('spinBtn').disabled = false;
+    // Christmas: once the prize is decided, offer the student's Elf Helper (double it) before it is awarded
+    const s0 = getStudent(activeStudentId);
+    if(s0 && currentSpinIsChristmas && elfCanBoost(s0, winningPrize)){
+      askElfHelper(s0, winningPrize, finishSpin);
+    } else {
+      finishSpin(false);
+    }
+  };
+  const finishSpin = (useElf)=>{
+    const s = getStudent(activeStudentId);
+    let awarded = winningPrize.points * multiplier;
+    let stashInfo = null; // null = not a stash prize, otherwise how many points the stash held
+    let xmasInfo = null;  // set on Christmas spins: { lines, points, itemName, offerPresent }
+    let naughtyInfo = null; // set on Naughty spins: { kind, amount, pct, before, after }
+    if(s && currentSpinIsNaughty){
+      naughtyInfo = applyNaughtyPrize(s, winningPrize); // the slice's number is a loss, never a win
+      awarded = 0;
+    } else if(s && currentSpinIsChristmas){
+      xmasInfo = applyChristmasPrize(s, winningPrize, { elf: !!useElf });
+      awarded = xmasInfo.points;
+      christmasContext = { studentId: s.id };
+    } else {
+      if(s && currentSpinIsHalloween && winningPrize.itemId === 'STASH'){
+        stashInfo = webStash;
+        awarded += webStash;
+        webStash = 0;
+      }
+      if(s && awarded > 0){
+        s.balance += awarded;
+      }
+    }
+
+    let awardedItemName = null;
+    let awardedItem = null;
+    if(xmasInfo){
+      awardedItemName = xmasInfo.itemName;
+    } else if(s && winningPrize.itemId){
+      awardedItem = resolvePrizeItem(winningPrize);
+      if(awardedItem){
+        const qty = multiplier;
+        s.inventory[awardedItem.id] = (s.inventory[awardedItem.id] || 0) + qty;
+        awardedItemName = qty > 1 ? `${awardedItem.name} ×${qty}` : awardedItem.name;
+      }
+    }
+
+    let webInfo = null; // null = not a web spin, otherwise { lost, stash: { added, taken, total } }
+    if(currentSpinIsChristmas || currentSpinIsNaughty){
+      riskState = null;
+    } else if(currentSpinIsHalloween){
+      riskState = null;
+      if(s && isRiskContinuation && halloweenReward && halloweenReward.studentId === s.id){
+        halloweenReward.points += awarded;
+        if(awardedItem) halloweenReward.items[awardedItem.id] = (halloweenReward.items[awardedItem.id] || 0) + multiplier;
+      } else {
+        halloweenReward = s ? { studentId: s.id, points: awarded, items: awardedItem ? { [awardedItem.id]: multiplier } : {} } : null;
+      }
+      if(s && winningPrize.itemId === 'WEB'){
+        if(hasStreak(halloweenReward)){
+          const lostPoints = Math.max(0, halloweenReward.points);
+          const lostText = describeReward(halloweenReward);
+          takeStreak(s, halloweenReward);
+          clearStreak(halloweenReward);
+          webInfo = { lost: lostText, stash: feedWebStash(lostPoints) };
+        } else {
+          webInfo = { lost: '', stash: feedWebStash(0) };
+        }
+      }
+    } else if(isRiskContinuation && riskState){
+      riskState.pot += awarded;
+    } else {
+      riskState = s ? { studentId: s.id, pot: awarded } : null;
+    }
+
+    persist(true);
+    renderAll();
+    showWinModal(winningPrize, s, awarded, multiplier, awardedItemName, webInfo, stashInfo, xmasInfo, naughtyInfo);
+  };
+  group.addEventListener('transitionend', onDone);
+}
+
+/** After a Christmas prize is decided: ask whether to spend an Elf Helper to double it. */
+function askElfHelper(student, prize, done){
+  const actionsWrap = document.getElementById('winModalActions');
+  actionsWrap.querySelectorAll('.risk-note').forEach(n => n.remove());
+  document.getElementById('winEmoji').textContent = '✨';
+  document.getElementById('winModalTitle').textContent = `You won ${prize.label}!`;
+  document.getElementById('winModalDetail').textContent =
+    `${student.name} has ${student.buffs.double} Elf Helper${student.buffs.double === 1 ? '' : 's'}. Use one now to double this prize?`;
+  setWinActions([
+    { label: '✨ Use Elf Helper (×2)', className: 'teal', onClick: () => done(true) },
+    { label: 'Keep it as is', className: 'ghost', onClick: () => done(false) },
+  ]);
+  document.getElementById('winModalOverlay').classList.add('show');
+}
+
+function setWinActions(buttons){
+  const actions = document.getElementById('winModalActions');
+  actions.innerHTML = '';
+  buttons.forEach(({ label, className, onClick }) => {
+    const btn = document.createElement('button');
+    btn.className = className;
+    btn.textContent = label;
+    btn.addEventListener('click', onClick);
+    actions.appendChild(btn);
+  });
+}
+
+function showWinModal(prize, student, awarded, multiplier, awardedItemName, webInfo, stashInfo, xmasInfo, naughtyInfo){
+  const emoji = document.getElementById('winEmoji');
+  const title = document.getElementById('winModalTitle');
+  const detail = document.getElementById('winModalDetail');
+  const actionsWrap = document.getElementById('winModalActions');
+  actionsWrap.querySelectorAll('.risk-note').forEach(n => n.remove());
+
+  const multTag = multiplier > 1 ? ` (×${multiplier})` : '';
+
+  if(currentSpinIsNaughty && naughtyInfo){
+    const name = student ? student.name : 'The student';
+    const ni = naughtyInfo;
+    if(ni.kind === 'saved'){
+      emoji.textContent = '😇';
+      title.textContent = 'Saved!';
+      detail.textContent = `${name} is saved — nothing happens.`;
+      setWinActions([{ label: 'OK', className: 'primary', onClick: closeWinModal }]);
+    } else if(ni.amount === 0){
+      emoji.textContent = '😅';
+      title.textContent = prize.label;
+      detail.textContent = ni.before <= 0
+        ? `${name}'s balance is ${formatPrice(ni.before)}, so a % loss takes nothing.`
+        : `${ni.pct}% of ${formatPrice(ni.before)} rounds down to nothing.`;
+      setWinActions([{ label: 'OK', className: 'primary', onClick: closeWinModal }]);
+    } else {
+      emoji.textContent = '😈';
+      title.textContent = prize.label;
+      detail.textContent = `${name} loses ${formatPrice(ni.amount)} points` +
+        (ni.kind === 'pct' ? ` (${ni.pct}% of ${formatPrice(ni.before)})` : '') +
+        `. Balance ${formatPrice(ni.before)} → ${formatPrice(ni.after)}${ni.after < 0 ? ' (in debt)' : ''}.`;
+      setWinActions([
+        { label: 'OK', className: 'primary', onClick: closeWinModal },
+        { label: '↩ Undo', className: 'ghost', onClick: undoNaughty },
+      ]);
+    }
+    document.getElementById('winModalOverlay').classList.add('show');
+    return;
+  }
+
+  if(currentSpinIsChristmas && xmasInfo){
+    const name = student ? student.name : 'The student';
+    emoji.textContent = '🎄';
+    title.textContent = `You won ${prize.label}!`;
+    const parts = [];
+    if(xmasInfo.points > 0) parts.push(`${name} earned ${xmasInfo.points} points. New balance: ${student ? formatPrice(student.balance) : '—'}.`);
+    if(xmasInfo.itemName) parts.push(`${name} received ${xmasInfo.itemName} — check their Inventory!`);
+    xmasInfo.lines.forEach(l => parts.push(l));
+    detail.textContent = parts.join(' ');
+    if(xmasInfo.offerPresent){
+      setWinActions([{ label: '🎁 Open a Present', className: 'christmas-btn', onClick: () => openPresentsModal(student ? student.id : null) }]);
+    } else {
+      setWinActions([{ label: 'Nice!', className: 'primary', onClick: closeWinModal }]);
+    }
+    document.getElementById('winModalOverlay').classList.add('show');
+    return;
+  }
+
+  if(currentSpinIsHalloween){
+    const rw = halloweenReward;
+    const name = student ? student.name : 'The student';
+    emoji.textContent = '🎃';
+    if(webInfo){
+      emoji.textContent = '🕸️';
+      title.textContent = prize.label;
+      detail.textContent = (webInfo.lost
+        ? `Everything won so far is gone! ${name} loses ${webInfo.lost}.`
+        : `${name} is stuck in the web, but had nothing to lose yet!`) + ' ' + stashNote(webInfo.stash);
+      setWinActions([{ label: 'OK', className: 'primary', onClick: closeWinModal }]);
+    } else if(hasStreak(rw)){
+      const won = awarded > 0 || !!awardedItemName;
+      title.textContent = won ? `You won ${prize.label}!` : prize.label;
+      let msg = '';
+      if(stashInfo > 0) msg += `${name} collects the ${stashInfo}-point Web Stash! `;
+      else if(awarded > 0) msg += `${name} earned ${awarded} points. `;
+      if(awardedItemName) msg += `${name} received ${awardedItemName}. `;
+      msg += `Won so far this round: ${describeReward(rw)}.`;
+      detail.textContent = msg;
+      setWinActions([
+        { label: 'Keep It', className: 'primary', onClick: closeWinModal },
+        { label: '🎃 Trick or Treat?', className: 'risk-btn', onClick: openDoorsModal },
+      ]);
+      const note = document.createElement('p');
+      note.className = 'risk-note';
+      note.textContent = 'Pick a door! It could be a treat, a trick that hands everything you\'ve won to a classmate, or something stranger…';
+      document.querySelector('.win-box').insertBefore(note, actionsWrap);
+    } else {
+      title.textContent = prize.label;
+      detail.textContent = stashInfo === 0 ? 'The Web Stash is empty — nothing to collect yet!' : 'Nothing won this time — spin again!';
+      setWinActions([{ label: 'OK', className: 'primary', onClick: closeWinModal }]);
+    }
+    document.getElementById('winModalOverlay').classList.add('show');
+    return;
+  }
+
+  const pot = riskState ? riskState.pot : awarded;
+  const canRisk = pot > 0 && !awardedItemName;
+
+  if(awarded > 0 || pot > 0 || awardedItemName){
+    emoji.textContent = currentSpinIsLucky ? '✨' : (multiplier > 1 ? '🔥' : '🎉');
+    title.textContent = awarded > 0 || awardedItemName ? `You won ${prize.label}${multTag}!` : prize.label;
+    let msg = awarded > 0
+      ? `${student ? student.name : 'The student'} just earned ${awarded} points. New balance: ${student ? formatPrice(student.balance) : '—'}.`
+      : `No extra points from this spin.`;
+    if(awardedItemName){
+      msg += ` They also received ${awardedItemName} — check their Inventory!`;
+    }
+    if(pot > awarded && !awardedItemName){
+      msg += ` This streak is at risk for ${pot} points total.`;
+    }
+    detail.textContent = msg;
+
+    if(canRisk){
+      setWinActions([
+        { label: 'Keep It', className: 'primary', onClick: closeWinModal },
+        { label: '🎲 Risk It (50/50)', className: 'risk-btn', onClick: doRisk },
+      ]);
+      const note = document.createElement('p');
+      note.className = 'risk-note';
+      note.textContent = `Risk it: spin again at double points, added to your ${pot}-point streak — but a 50% miss loses the whole streak.`;
+      document.querySelector('.win-box').insertBefore(note, actionsWrap);
+    } else {
+      setWinActions([
+        { label: 'Nice!', className: 'primary', onClick: closeWinModal },
+      ]);
+    }
+  } else {
+    emoji.textContent = '😶';
+    title.textContent = prize.label;
+    detail.textContent = 'No points this time — spin again next time!';
+    setWinActions([
+      { label: 'OK', className: 'primary', onClick: closeWinModal },
+    ]);
+  }
+
+  document.getElementById('winModalOverlay').classList.add('show');
+}
+
+function resetSpinVisuals(){
+  riskState = null;
+  halloweenReward = null;
+  currentSpinIsLucky = false;
+  currentSpinIsHalloween = false;
+  currentSpinIsChristmas = false;
+  currentSpinIsNaughty = false;
+  naughtyUndo = null;
+  christmasContext = null;
+  document.getElementById('wheelStage').classList.remove('lucky-active', 'halloween-active', 'christmas-active', 'naughty-active');
+  const banner = document.getElementById('luckyBanner');
+  banner.classList.remove('show', 'halloween', 'christmas', 'naughty');
+  currentWheelPool = wheelPoolFor(activePrizeTab);
+  renderWheel();
+}
+
+function closeWinModal(){
+  document.getElementById('winModalOverlay').classList.remove('show');
+  document.querySelectorAll('.risk-note').forEach(n => n.remove());
+  resetSpinVisuals();
+}
+
+function doRisk(){
+  if(!riskState || riskState.pot <= 0){ closeWinModal(); return; }
+  document.getElementById('winModalOverlay').classList.remove('show');
+  document.querySelectorAll('.risk-note').forEach(n => n.remove());
+
+  const succeeded = Math.random() < 0.5;
+
+  if(succeeded){
+    setTimeout(()=> spinWheel(2, true), 250);
+  } else {
+    const student = getStudent(riskState.studentId);
+    const lostAmount = riskState.pot;
+    if(student){
+      student.balance = student.balance - lostAmount;
+      persist();
+      renderAll();
+    }
+    riskState = null;
+    setTimeout(()=> showLoseModal(student, lostAmount), 250);
+  }
+}
+
+function showLoseModal(student, lostAmount){
+  document.getElementById('winEmoji').textContent = '💥';
+  document.getElementById('winModalTitle').textContent = 'You lost it!';
+  document.getElementById('winModalDetail').textContent = `The risk didn't pay off — ${student ? student.name : 'the student'} lost the ${lostAmount}-point streak. Better luck on the next spin!`;
+  setWinActions([
+    { label: 'OK', className: 'primary', onClick: closeWinModal },
+  ]);
+  document.getElementById('winModalOverlay').classList.add('show');
+}
+
+document.getElementById('winModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'winModalOverlay') closeWinModal();
+});
+
+/* ---------------- Random Student picker ---------------- */
+let randomInterval = null;
+let randomPickedId = null;
+let randomSessionPicked = new Set();
+
+function randomPoolForGrade(grade){
+  return grade === 'all' ? students : students.filter(s => s.grade === grade);
+}
+
+function refreshRandomSessionInfo(){
+  const grade = document.getElementById('randomGradeSelect').value;
+  const pool = randomPoolForGrade(grade);
+  const infoEl = document.getElementById('randomSessionInfo');
+  const rollBtn = document.getElementById('randomRollBtn');
+
+  if(pool.length === 0){
+    infoEl.textContent = '';
+    infoEl.classList.remove('done');
+    rollBtn.disabled = true;
+    return;
+  }
+
+  const remaining = pool.filter(s => !randomSessionPicked.has(s.id));
+  const pickedCount = pool.length - remaining.length;
+
+  if(remaining.length === 0){
+    infoEl.textContent = `All ${pool.length} picked this session — reset to roll again.`;
+    infoEl.classList.add('done');
+    rollBtn.disabled = true;
+  } else {
+    infoEl.textContent = `${pickedCount} of ${pool.length} picked this session`;
+    infoEl.classList.remove('done');
+    rollBtn.disabled = false;
+  }
+}
+
+function openRandomModal(){
+  const gradeSelect = document.getElementById('randomGradeSelect');
+  const defaultGrade = gradeFilter !== 'all' ? gradeFilter : 'all';
+  gradeSelect.innerHTML = `<option value="all">All Grades</option>` +
+    GRADES.map(g => `<option value="${g}" ${g === defaultGrade ? 'selected' : ''}>${g} Grade</option>`).join('');
+
+  document.getElementById('randomAvatar').textContent = '🎲';
+  document.getElementById('randomResultName').textContent = 'Ready when you are';
+  document.getElementById('randomSelectBtn').disabled = true;
+  randomPickedId = null;
+
+  refreshRandomSessionInfo();
+  document.getElementById('randomModalOverlay').classList.add('show');
+}
+
+function closeRandomModal(){
+  if(randomInterval){ clearInterval(randomInterval); randomInterval = null; }
+  document.getElementById('randomModalOverlay').classList.remove('show');
+}
+
+function resetRandomSession(){
+  randomSessionPicked.clear();
+  document.getElementById('randomAvatar').textContent = '🎲';
+  document.getElementById('randomResultName').textContent = 'Ready when you are';
+  document.getElementById('randomSelectBtn').disabled = true;
+  randomPickedId = null;
+  refreshRandomSessionInfo();
+}
+
+function rollRandomStudent(){
+  const grade = document.getElementById('randomGradeSelect').value;
+  const basePool = randomPoolForGrade(grade);
+  const pool = basePool.filter(s => !randomSessionPicked.has(s.id));
+  const nameEl = document.getElementById('randomResultName');
+  const avatarEl = document.getElementById('randomAvatar');
+  const selectBtn = document.getElementById('randomSelectBtn');
+
+  if(randomInterval){ clearInterval(randomInterval); randomInterval = null; }
+  selectBtn.disabled = true;
+  randomPickedId = null;
+
+  if(basePool.length === 0){
+    avatarEl.textContent = '🚫';
+    nameEl.textContent = `No students in ${grade === 'all' ? 'the roster' : 'that grade'} yet.`;
+    return;
+  }
+
+  if(pool.length === 0){
+    avatarEl.textContent = '🎉';
+    nameEl.textContent = 'Everyone has been picked this session — reset to roll again.';
+    return;
+  }
+
+  const finalPick = pool[Math.floor(Math.random() * pool.length)];
+  let ticks = 0;
+  const maxTicks = 16;
+
+  randomInterval = setInterval(()=>{
+    const r = pool[Math.floor(Math.random() * pool.length)];
+    nameEl.textContent = r.name;
+    avatarEl.textContent = initials(r.name);
+    ticks++;
+    if(ticks >= maxTicks){
+      clearInterval(randomInterval);
+      randomInterval = null;
+      nameEl.textContent = finalPick.name;
+      avatarEl.textContent = initials(finalPick.name);
+      randomPickedId = finalPick.id;
+      randomSessionPicked.add(finalPick.id);
+      selectBtn.disabled = false;
+      refreshRandomSessionInfo();
+    }
+  }, 70);
+}
+
+document.getElementById('randomStudentBtn').addEventListener('click', openRandomModal);
+document.getElementById('randomCloseBtn').addEventListener('click', closeRandomModal);
+document.getElementById('randomRollBtn').addEventListener('click', rollRandomStudent);
+document.getElementById('randomResetBtn').addEventListener('click', resetRandomSession);
+document.getElementById('randomGradeSelect').addEventListener('change', refreshRandomSessionInfo);
+document.getElementById('randomModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'randomModalOverlay') closeRandomModal();
+});
+document.getElementById('randomSelectBtn').addEventListener('click', ()=>{
+  if(!randomPickedId) return;
+  activeStudentId = randomPickedId;
+  persist(true);
+  closeRandomModal();
+  renderAll();
+});
+
+/* ---------------- Points Taken history log ---------------- */
+function formatDateLabel(dateStr){
+  const today = todayStr();
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  if(dateStr === today) return 'Today';
+  if(dateStr === yesterday) return 'Yesterday';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function renderHistoryModal(){
+  const wrap = document.getElementById('historyList');
+  if(transactions.length === 0){
+    wrap.innerHTML = `<div class="empty-history">No points taken yet.</div>`;
+    return;
+  }
+
+  const byDate = {};
+  transactions.forEach(t => { (byDate[t.date] = byDate[t.date] || []).push(t); });
+  const dates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+
+  wrap.innerHTML = dates.map(date => {
+    const entries = byDate[date].slice().sort((a,b) => b.timestamp - a.timestamp);
+    const total = entries.reduce((sum,t) => sum + Math.abs(t.amount), 0);
+    const rows = entries.map(t => `
+      <div class="history-row">
+        <span class="history-name">${escapeHtml(t.studentName)}${t.reason ? `<span class="history-reason">${escapeHtml(t.reason)}</span>` : ''}</span>
+        <span class="history-amount">${t.amount}</span>
+        <span class="history-time">${new Date(t.timestamp).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</span>
+      </div>
+    `).join('');
+    return `
+      <div class="history-day">
+        <div class="history-day-head">
+          <span class="history-date">${formatDateLabel(date)}</span>
+          <span class="history-total">-${formatPrice(total)} pts</span>
+        </div>
+        ${rows}
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('historyBtn').addEventListener('click', ()=>{
+  renderHistoryModal();
+  document.getElementById('historyModalOverlay').classList.add('show');
+});
+document.getElementById('historyCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('historyModalOverlay').classList.remove('show');
+});
+document.getElementById('historyModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'historyModalOverlay') document.getElementById('historyModalOverlay').classList.remove('show');
+});
+document.getElementById('historyClearBtn').addEventListener('click', ()=>{
+  if(transactions.length === 0) return;
+  if(!confirm('Clear the entire points-taken log? This cannot be undone.')) return;
+  transactions = [];
+  persist(true);
+  renderHistoryModal();
+});
+
+/* ---------------- Random Item Odds ---------------- */
+function renderItemOddsModal(){
+  const wrap = document.getElementById('itemOddsList');
+  const shop = items.filter(it => !it.hidden);
+  if(shop.length === 0){
+    wrap.innerHTML = `<div class="empty-history">No items in the shop yet. Add some rewards in the Store tab first.</div>`;
+    return;
+  }
+  const total = shop.reduce((sum,it) => sum + Math.max(0, Number(it.weight) || 0), 0) || 1;
+  wrap.innerHTML = shop.map(it => {
+    const w = Math.max(0, Number(it.weight) || 0);
+    const pct = Math.round((w / total) * 100);
+    return `
+      <div class="odds-row">
+        <span class="odds-name">${escapeHtml(it.name)}</span>
+        <input type="number" min="0" class="odds-input" value="${w}" data-id="${it.id}">
+        <span class="odds-pct">${pct}%</span>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('.odds-input').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const id = e.target.dataset.id;
+      const item = items.find(it => it.id === id);
+      if(!item) return;
+      item.weight = Math.max(0, Number(e.target.value) || 0);
+      persist();
+      renderItemOddsModal();
+    });
+  });
+}
+
+document.getElementById('itemOddsBtn').addEventListener('click', ()=>{
+  renderItemOddsModal();
+  document.getElementById('itemOddsModalOverlay').classList.add('show');
+});
+document.getElementById('itemOddsCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('itemOddsModalOverlay').classList.remove('show');
+});
+document.getElementById('itemOddsModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'itemOddsModalOverlay') document.getElementById('itemOddsModalOverlay').classList.remove('show');
+});
+
+
+/* ---------------- Trick or Treat doors ---------------- */
+let doorsState = null; // { outcomes: [type x3], picked: index|null }
+
+const DOOR_INFO = {
+  treat:   { emoji: '🍬', tag: 'Treat' },
+  trick:   { emoji: '🎭', tag: 'Trick' },
+  rare:    { emoji: '👑', tag: 'Rare!' },
+  wipe:    { emoji: '🕸️', tag: 'Lose all' },
+  stash:   { emoji: '💰', tag: 'Web stash' },
+  respin:  { emoji: '🔄', tag: 'Spin again' },
+  drain:   { emoji: '💸', tag: 'Drain' },
+  nothing: { emoji: '😶', tag: 'Nothing' },
+};
+const DOOR_KEYS = ['treat', 'trick', 'rare', 'wipe', 'stash', 'respin', 'drain', 'nothing'];
+
+/** Each outcome's number is a relative weight, so the chances always scale to 100%. */
+function doorShares(){
+  const total = DOOR_KEYS.reduce((sum, k) => sum + Math.max(0, halloweenOdds[k]), 0);
+  const shares = {};
+  DOOR_KEYS.forEach(k => { shares[k] = total > 0 ? (Math.max(0, halloweenOdds[k]) / total) * 100 : (k === 'treat' ? 100 : 0); });
+  return { shares, total };
+}
+
+function rollDoorOutcome(){
+  const { shares } = doorShares();
+  let r = Math.random() * 100;
+  for(const key of DOOR_KEYS){
+    if(r < shares[key]) return key;
+    r -= shares[key];
+  }
+  return 'treat';
+}
+
+function addToInventory(student, itemId, qty){
+  student.inventory[itemId] = (student.inventory[itemId] || 0) + qty;
+}
+
+/** The web always feeds the stash: what it took, or a flat 10 if there were no points to take. */
+const WEB_EMPTY_BONUS = 10;
+function feedWebStash(lostPoints){
+  const taken = lostPoints > 0;
+  const added = taken ? lostPoints : WEB_EMPTY_BONUS;
+  webStash += added;
+  return { added, taken, total: webStash };
+}
+function stashNote(f){
+  return f.taken
+    ? `${f.added} points fall into the Web Stash (now ${f.total}).`
+    : `The web adds ${f.added} points to the Web Stash (now ${f.total}).`;
+}
+
+/* A "streak" (halloweenReward) is everything won so far this round: { studentId, points, items: {itemId: qty} } */
+function hasStreak(rw){
+  return !!rw && (rw.points > 0 || Object.values(rw.items || {}).some(q => q > 0));
+}
+function clearStreak(rw){ rw.points = 0; rw.items = {}; }
+function describeReward(rw){
+  const parts = [];
+  if(rw.points > 0) parts.push(`${rw.points} points`);
+  Object.entries(rw.items || {}).forEach(([id, q]) => {
+    if(q > 0){
+      const item = items.find(it => it.id === id);
+      parts.push(`${item ? item.name : 'an item'}${q > 1 ? ' ×' + q : ''}`);
+    }
+  });
+  return parts.join(', ') || 'nothing yet';
+}
+function takeStreak(student, rw){
+  student.balance -= rw.points;
+  Object.entries(rw.items || {}).forEach(([id, q]) => {
+    const left = (student.inventory[id] || 0) - q;
+    if(left > 0) student.inventory[id] = left; else delete student.inventory[id];
+  });
+}
+function giveStreak(target, rw){
+  target.balance += rw.points;
+  Object.entries(rw.items || {}).forEach(([id, q]) => addToInventory(target, id, q));
+}
+
+function openDoorsModal(){
+  if(!hasStreak(halloweenReward)){ closeWinModal(); return; }
+  document.getElementById('winModalOverlay').classList.remove('show');
+  document.querySelectorAll('.risk-note').forEach(n => n.remove());
+  doorsState = { outcomes: [rollDoorOutcome(), rollDoorOutcome(), rollDoorOutcome()], picked: null };
+  document.getElementById('doorsResult').textContent = '';
+  document.getElementById('doorsActions').innerHTML = '';
+  renderDoors();
+  document.getElementById('doorsModalOverlay').classList.add('show');
+}
+
+function renderDoors(){
+  const row = document.getElementById('doorsRow');
+  const picked = doorsState.picked;
+  row.innerHTML = doorsState.outcomes.map((outcome, i) => {
+    const revealed = picked !== null;
+    const info = DOOR_INFO[outcome];
+    return `
+      <button class="door ${revealed ? 'revealed' : ''} ${picked === i ? 'picked' : ''}" data-i="${i}" ${revealed ? 'disabled' : ''}>
+        <span class="door-emoji">${revealed ? info.emoji : '🚪'}</span>
+        <span>Door ${i + 1}</span>
+        ${revealed ? `<span class="door-tag">${info.tag}</span>` : ''}
+      </button>`;
+  }).join('');
+  row.querySelectorAll('.door').forEach(btn => {
+    btn.addEventListener('click', () => pickDoor(Number(btn.dataset.i)));
+  });
+}
+
+function pickDoor(i){
+  if(!doorsState || doorsState.picked !== null) return;
+  doorsState.picked = i;
+  const outcome = doorsState.outcomes[i];
+  const message = resolveDoor(outcome);
+  renderDoors();
+  document.getElementById('doorsResult').textContent = message;
+  const actions = document.getElementById('doorsActions');
+  actions.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'primary';
+  if(outcome === 'respin'){
+    btn.textContent = '🔄 Spin Again';
+    btn.addEventListener('click', respinFromDoors);
+  } else {
+    btn.textContent = 'Done';
+    btn.addEventListener('click', closeDoorsModal);
+  }
+  actions.appendChild(btn);
+}
+
+function closeDoorsModal(){
+  document.getElementById('doorsModalOverlay').classList.remove('show');
+  doorsState = null;
+  resetSpinVisuals();
+}
+
+/** "Back to spin" door: keep everything won so far and spin the Halloween wheel again. */
+function respinFromDoors(){
+  document.getElementById('doorsModalOverlay').classList.remove('show');
+  doorsState = null;
+  setTimeout(() => spinWheel(1, true), 250);
+}
+
+/** Apply a door's outcome and return a message describing what happened. */
+function resolveDoor(type){
+  const rw = halloweenReward;
+  const s = rw ? getStudent(rw.studentId) : null;
+  if(!s) return 'Something went wrong — no student found.';
+  const peers = students.filter(x => x.grade === s.grade && x.id !== s.id);
+  let message = '';
+
+  if(type === 'treat'){
+    if(Math.random() * 100 < halloweenOdds.candyShare){
+      const candy = getCandyItem();
+      addToInventory(s, candy.id, 1);
+      rw.items[candy.id] = (rw.items[candy.id] || 0) + 1;
+      message = `🍬 Treat! ${s.name} gets a Candy!`;
+    } else {
+      const bonus = 1 + Math.floor(Math.random() * 100);
+      s.balance += bonus;
+      rw.points += bonus;
+      message = `🎁 Treat! ${s.name} gets ${bonus} bonus points!`;
+    }
+  } else if(type === 'trick'){
+    if(peers.length === 0){
+      message = `🎭 Trick! But there's no one else in ${s.grade} grade to take it, so ${s.name} keeps everything.`;
+    } else {
+      const target = peers[Math.floor(Math.random() * peers.length)];
+      const what = describeReward(rw);
+      takeStreak(s, rw);
+      giveStreak(target, rw);
+      clearStreak(rw);
+      message = `🎭 Trick! ${s.name} hands over ${what} to ${target.name}!`;
+    }
+  } else if(type === 'rare'){
+    const candy = getCandyItem();
+    addToInventory(s, candy.id, 1);
+    rw.items[candy.id] = (rw.items[candy.id] || 0) + 1;
+    const lucky = shuffled(peers).slice(0, 4);
+    lucky.forEach(peer => addToInventory(peer, candy.id, 1));
+    message = lucky.length
+      ? `👑 RARE DOOR! Candy for ${s.name}, ${lucky.map(x => x.name).join(', ')}!`
+      : `👑 RARE DOOR! ${s.name} gets a Candy (no classmates in ${s.grade} grade to share with).`;
+  } else if(type === 'wipe'){
+    const what = describeReward(rw);
+    if(hasStreak(rw)){
+      const lostPoints = Math.max(0, rw.points);
+      takeStreak(s, rw);
+      clearStreak(rw);
+      message = `🕸️ Everything's gone! ${s.name} loses ${what}. ${stashNote(feedWebStash(lostPoints))}`;
+    } else {
+      message = `🕸️ A door that takes everything — but ${s.name} had nothing to lose! ${stashNote(feedWebStash(0))}`;
+    }
+  } else if(type === 'stash'){
+    if(webStash > 0){
+      const pot = webStash;
+      s.balance += pot;
+      rw.points += pot;
+      webStash = 0;
+      message = `💰 Web Stash! ${s.name} collects ${pot} points from the web!`;
+    } else {
+      message = `💰 The Web Stash is empty — nothing to collect yet.`;
+    }
+  } else if(type === 'respin'){
+    message = `🔄 Back to the wheel! ${s.name} keeps ${describeReward(rw)} for now — spin again!`;
+  } else if(type === 'drain'){
+    const amount = 1 + Math.floor(Math.random() * 100);
+    s.balance -= amount;
+    message = `💸 Drained! ${s.name} loses ${amount} points.`;
+  } else {
+    message = `😶 Nothing behind this door.`;
+  }
+
+  persist(true);
+  renderAll();
+  return message;
+}
+
+/* ---------------- Door odds settings ---------------- */
+function refreshDoorOddsModal(){
+  const o = halloweenOdds;
+  const ids = { treat:'oddsTreat', trick:'oddsTrick', rare:'oddsRare', wipe:'oddsWipe', stash:'oddsStash', respin:'oddsRespin', drain:'oddsDrain', nothing:'oddsNothing' };
+  Object.entries(ids).forEach(([key, id]) => { document.getElementById(id).value = o[key]; });
+  document.getElementById('oddsCandyShare').value = o.candyShare;
+
+  const { shares, total } = doorShares();
+  document.querySelectorAll('.door-share').forEach(el => {
+    el.textContent = `${Math.round(shares[el.dataset.key])}%`;
+  });
+  document.getElementById('doorOddsSummary').textContent = total === 100
+    ? 'Your numbers add up to exactly 100%.'
+    : `Your numbers add up to ${total}, so they're scaled to 100% — the % on the right of each row is its real chance.`;
+}
+
+[
+  ['oddsTreat', 'treat', 100],
+  ['oddsTrick', 'trick', 100],
+  ['oddsRare', 'rare', 100],
+  ['oddsWipe', 'wipe', 100],
+  ['oddsStash', 'stash', 100],
+  ['oddsRespin', 'respin', 100],
+  ['oddsDrain', 'drain', 100],
+  ['oddsNothing', 'nothing', 100],
+  ['oddsCandyShare', 'candyShare', 100],
+].forEach(([id, key, max]) => {
+  document.getElementById(id).addEventListener('change', (e)=>{
+    halloweenOdds[key] = Math.max(0, Math.min(max, Number(e.target.value) || 0));
+    persist();
+    refreshDoorOddsModal();
+  });
+});
+document.getElementById('doorOddsBtn').addEventListener('click', ()=>{
+  refreshDoorOddsModal();
+  document.getElementById('doorOddsModalOverlay').classList.add('show');
+});
+document.getElementById('doorOddsCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('doorOddsModalOverlay').classList.remove('show');
+});
+document.getElementById('doorOddsModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'doorOddsModalOverlay') document.getElementById('doorOddsModalOverlay').classList.remove('show');
+});
+document.getElementById('doorsModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'doorsModalOverlay' && doorsState && doorsState.picked !== null && doorsState.outcomes[doorsState.picked] !== 'respin') closeDoorsModal();
+});
+
+/* ---------------- Christmas: trees, snowmen, buffs, presents ---------------- */
+function getTree(grade){
+  if(!trees[grade]) trees[grade] = { ornaments: 0, unlocked: [] };
+  return trees[grade];
+}
+
+/** Short text for a reward item id: '', 'CANDY', 'RANDOM', or a real shop item id. */
+function itemRewardLabel(itemId){
+  if(!itemId) return '';
+  if(itemId === 'CANDY') return '🍬 Candy';
+  if(itemId === 'RANDOM') return 'a random shop item';
+  const item = items.find(it => it.id === itemId);
+  return item ? item.name : '';
+}
+
+/** Put one reward item into a student's inventory. Returns the item given (or null). */
+function giveItemReward(student, itemId){
+  if(!itemId) return null;
+  const item = itemId === 'CANDY' ? getCandyItem() : (itemId === 'RANDOM' ? pickRandomShopItem() : items.find(it => it.id === itemId));
+  if(!item) return null;
+  addToInventory(student, item.id, 1);
+  return item;
+}
+
+function rewardText(points, itemId){
+  const parts = [];
+  if(points > 0) parts.push(`${points} points`);
+  const label = itemRewardLabel(itemId);
+  if(label) parts.push(label);
+  return parts.join(' + ');
+}
+
+/** Add ornaments to a grade's tree. Returns messages for any milestones reached (which reward the whole grade). */
+function addOrnaments(grade, n){
+  const tree = getTree(grade);
+  tree.ornaments += n;
+  const events = [];
+  christmasSettings.milestones.slice().sort((a, b) => a.count - b.count).forEach(m => {
+    if(tree.ornaments >= m.count && !tree.unlocked.includes(m.count)){
+      tree.unlocked.push(m.count);
+      const members = students.filter(x => x.grade === grade);
+      members.forEach(x => {
+        if(m.points > 0) x.balance += m.points;
+        giveItemReward(x, m.itemId);
+      });
+      const what = rewardText(m.points, m.itemId);
+      events.push(
+        `🎉 The ${grade} tree reached ${m.count} ornaments!` +
+        (what ? ` Everyone in ${grade} grade gets ${what}.` : '') +
+        (m.note ? ` ${m.note}` : '')
+      );
+    }
+  });
+  return events;
+}
+
+/* ---- Snowman ---- */
+function snowmanPieces(){ return christmasSettings.snowmanPieces; }
+function ownedPieces(s){
+  const valid = snowmanPieces();
+  return s.snowman.pieces.filter(id => valid.some(p => p.id === id));
+}
+
+/** Roll the Christmas Miracle that can follow a finished snowman (weights are editable in settings). */
+function miracleShares(){
+  const odds = christmasSettings.miracleOdds;
+  const total = MIRACLE_KEYS.reduce((sum, k) => sum + Math.max(0, odds[k]), 0);
+  const shares = {};
+  MIRACLE_KEYS.forEach(k => { shares[k] = total > 0 ? (Math.max(0, odds[k]) / total) * 100 : (k === 'none' ? 100 : 0); });
+  return { shares, total };
+}
+function rollMiracle(){
+  const { shares } = miracleShares();
+  let r = Math.random() * 100;
+  for(const key of MIRACLE_KEYS){
+    if(r < shares[key]) return key;
+    r -= shares[key];
+  }
+  return 'none';
+}
+
+/**
+ * Give up to `count` random missing pieces. Completing the set pays the reward, rolls a
+ * Christmas Miracle, and starts a new snowman. Returns { lines, offerPresent }.
+ */
+function giveSnowmanPieces(s, count){
+  xmasExtras(s);
+  const lines = [];
+  let offerPresent = false;
+  const total = () => snowmanPieces().length;
+  const complete = () => {
+    s.snowman.built += 1;
+    s.snowman.pieces = [];
+    const reward = christmasSettings.snowmanReward;
+    if(reward.points > 0) s.balance += reward.points;
+    giveItemReward(s, reward.itemId);
+    const what = rewardText(reward.points, reward.itemId);
+    lines.push(`🎉 Snowman complete!${what ? ` ${s.name} gets ${what}` : ` ${s.name} finished a snowman`} and starts snowman #${s.snowman.built + 1}.`);
+
+    const miracle = rollMiracle();
+    if(miracle === 'present'){
+      offerPresent = true;
+      lines.push(`🌟 CHRISTMAS MIRACLE! A present appears for ${s.name}!`);
+    } else if(miracle === 'cocoa'){
+      s.buffs.cocoa += COCOA_CHARGES;
+      lines.push(`🌟 CHRISTMAS MIRACLE! ☕ Hot Cocoa — +${COCOA_BONUS} points on ${s.name}'s next ${COCOA_CHARGES} winning spins!`);
+    } else if(miracle === 'elf'){
+      s.buffs.double += 1;
+      lines.push(`🌟 CHRISTMAS MIRACLE! ✨ Elf Helper — ${s.name}'s next prize will be doubled!`);
+    } else {
+      lines.push('🕯️ No Christmas miracle this time.');
+    }
+  };
+  for(let i = 0; i < count; i++){
+    if(ownedPieces(s).length >= total()) complete(); // e.g. pieces were removed in settings
+    const owned = ownedPieces(s);
+    const missing = snowmanPieces().filter(p => !owned.includes(p.id));
+    if(missing.length === 0) break;
+    const piece = missing[Math.floor(Math.random() * missing.length)];
+    s.snowman.pieces = owned.concat(piece.id);
+    lines.push(`⛄ ${s.name} found the ${piece.emoji} ${piece.name}! (${s.snowman.pieces.length}/${total()})`);
+    if(s.snowman.pieces.length >= total()) complete();
+  }
+  return { lines, offerPresent };
+}
+
+/**
+ * Apply a Christmas prize (a wheel slice or something inside a present) and describe what happened.
+ * Buffs boost wheel prizes; presents pass noBuffs so they neither use nor get boosted by them.
+ */
+/** Can an Elf Helper double this wheel prize? (only real wins: points or an item/ornament/piece, not buffs or presents) */
+function elfCanBoost(s, prize){
+  xmasExtras(s);
+  if(s.buffs.double <= 0) return false;
+  const kind = prize.itemId || null;
+  if(['PRESENT', 'BUFF_DOUBLE', 'BUFF_COCOA'].includes(kind)) return false;
+  return prize.points > 0 || !!kind;
+}
+
+function applyChristmasPrize(s, prize, opts){
+  opts = opts || {};
+  xmasExtras(s);
+  const kind = prize.itemId || null;
+  const lines = [];
+  const isBuffOrPresent = ['PRESENT', 'BUFF_DOUBLE', 'BUFF_COCOA'].includes(kind);
+  const boostable = !opts.noBuffs && !isBuffOrPresent && (prize.points > 0 || !!kind);
+  let mult = 1;
+  let cocoa = 0;
+  if(boostable && opts.elf && s.buffs.double > 0){
+    s.buffs.double -= 1;
+    mult = 2;
+    lines.push('✨ Elf Helper doubled it!');
+  }
+  if(boostable && prize.points > 0 && s.buffs.cocoa > 0){
+    s.buffs.cocoa -= 1;
+    cocoa = COCOA_BONUS;
+    lines.push(`☕ Hot Cocoa adds ${COCOA_BONUS} points (${s.buffs.cocoa} win${s.buffs.cocoa === 1 ? '' : 's'} left).`);
+  }
+  const points = prize.points * mult + cocoa;
+  if(points > 0) s.balance += points;
+
+  let itemName = null;
+  let offerPresent = false;
+  if(kind === 'ORNAMENT'){
+    const events = addOrnaments(s.grade, mult);
+    lines.push(`🎄 ${mult > 1 ? mult + ' ornaments go' : 'An ornament goes'} on the ${s.grade} tree (now ${getTree(s.grade).ornaments}).`);
+    events.forEach(e => lines.push(e));
+  } else if(kind === 'SNOWMAN'){
+    const sm = giveSnowmanPieces(s, mult);
+    sm.lines.forEach(l => lines.push(l));
+    if(sm.offerPresent) offerPresent = true;
+  } else if(kind === 'SPIRIT'){
+    lines.push(`🌟 CHRISTMAS SPIRIT! ${s.name} gets ${mult > 1 ? mult + ' ornaments and ' + mult + ' snowman pieces' : 'an ornament and a snowman piece'}.`);
+    const events = addOrnaments(s.grade, mult);
+    lines.push(`🎄 ${mult > 1 ? mult + ' ornaments go' : 'An ornament goes'} on the ${s.grade} tree (now ${getTree(s.grade).ornaments}).`);
+    events.forEach(e => lines.push(e));
+    const sm = giveSnowmanPieces(s, mult);
+    sm.lines.forEach(l => lines.push(l));
+    if(sm.offerPresent) offerPresent = true;
+  } else if(kind === 'BUFF_DOUBLE'){
+    s.buffs.double += 1;
+    lines.push(`✨ Elf Helper! ${s.name} can use it after a future win to double that prize.`);
+  } else if(kind === 'BUFF_COCOA'){
+    s.buffs.cocoa += COCOA_CHARGES;
+    lines.push(`☕ Hot Cocoa! +${COCOA_BONUS} points on ${s.name}'s next ${COCOA_CHARGES} winning spins.`);
+  } else if(kind === 'PRESENT'){
+    if(!opts.noBuffs){
+      offerPresent = true;
+      lines.push(`Santa left a present for ${s.name} — pick one!`);
+    }
+  } else if(kind){
+    const item = resolvePrizeItem(prize);
+    if(item){
+      addToInventory(s, item.id, mult);
+      itemName = mult > 1 ? `${item.name} ×${mult}` : item.name;
+    }
+  }
+  return { lines, points, itemName, offerPresent };
+}
+
+/* ---- Present picker (three presents, each rolls a prize from the editable Presents list) ---- */
+let presentsState = null; // { prizes: [prize x3], picked: index|null }
+
+function presentEmoji(prize){
+  const byKind = { ORNAMENT: '🎄', SNOWMAN: '⛄', BUFF_DOUBLE: '✨', BUFF_COCOA: '☕', CANDY: '🍬', SPIRIT: '🌟', ULTIMATE: '🎆', RANDOM_POINTS: '💰' };
+  return byKind[prize.itemId] || (prize.points > 0 ? '⭐' : '🎁');
+}
+
+function openPresentsModal(studentId){
+  const s = studentId ? getStudent(studentId) : null;
+  if(!s || presentPrizes.length === 0){ closeWinModal(); return; }
+  christmasContext = { studentId: s.id };
+  document.getElementById('winModalOverlay').classList.remove('show');
+  document.querySelectorAll('.risk-note').forEach(n => n.remove());
+  presentsState = { prizes: [pickPrize(presentPrizes), pickPrize(presentPrizes), pickPrize(presentPrizes)], picked: null };
+  document.getElementById('presentsResult').textContent = '';
+  document.getElementById('presentsActions').innerHTML = '';
+  renderPresents();
+  document.getElementById('presentsModalOverlay').classList.add('show');
+}
+
+function renderPresents(){
+  const row = document.getElementById('presentsRow');
+  const picked = presentsState.picked;
+  row.innerHTML = presentsState.prizes.map((prize, i) => {
+    const revealed = picked !== null;
+    return `
+      <button class="present ${revealed ? 'revealed' : ''} ${picked === i ? 'picked' : ''}" data-i="${i}" ${revealed ? 'disabled' : ''}>
+        <span class="present-emoji">${revealed ? presentEmoji(prize) : '🎁'}</span>
+        <span>Present ${i + 1}</span>
+        ${revealed ? `<span class="present-tag">${escapeHtml(prize.label)}</span>` : ''}
+      </button>`;
+  }).join('');
+  row.querySelectorAll('.present').forEach(btn => {
+    btn.addEventListener('click', () => pickPresent(Number(btn.dataset.i)));
+  });
+}
+
+function pickPresent(i){
+  if(!presentsState || presentsState.picked !== null) return;
+  presentsState.picked = i;
+  const result = resolvePresent(presentsState.prizes[i]);
+  renderPresents();
+  document.getElementById('presentsResult').textContent = result.text;
+  const actions = document.getElementById('presentsActions');
+  actions.innerHTML = '';
+  if(result.offerPresent){
+    const again = document.createElement('button');
+    again.className = 'christmas-btn';
+    again.textContent = '🎁 Open Another Present';
+    again.addEventListener('click', () => openPresentsModal(christmasContext ? christmasContext.studentId : null));
+    actions.appendChild(again);
+  }
+  const done = document.createElement('button');
+  done.className = 'primary';
+  done.textContent = result.offerPresent ? 'No thanks' : 'Done';
+  done.addEventListener('click', closePresentsModal);
+  actions.appendChild(done);
+}
+
+function closePresentsModal(){
+  document.getElementById('presentsModalOverlay').classList.remove('show');
+  presentsState = null;
+  resetSpinVisuals();
+}
+
+function resolvePresent(prize){
+  const s = christmasContext ? getStudent(christmasContext.studentId) : null;
+  if(!s) return { text: 'Something went wrong — no student found.', offerPresent: false };
+  if(prize.itemId === 'RANDOM_POINTS'){
+    // roll the jackpot amount now (whole points, 100-1000)
+    prize = { ...prize, points: POINTS_PRESENT_MIN + Math.floor(Math.random() * (POINTS_PRESENT_MAX - POINTS_PRESENT_MIN + 1)) };
+  }
+  const info = applyChristmasPrize(s, prize, { noBuffs: true });
+  const parts = [];
+  if(info.points > 0) parts.push(`${s.name} gets ${info.points} points!`);
+  if(info.itemName) parts.push(`${s.name} gets ${info.itemName}!`);
+  info.lines.forEach(l => parts.push(l));
+  if(prize.itemId === 'ULTIMATE') parts.unshift('🎆 ULTIMATE CHRISTMAS PRESENT!! One in a thousand!');
+  if(parts.length === 0) parts.push('📭 An empty box! Better luck next time.');
+  persist(true);
+  renderAll();
+  return { text: `${prize.label} — ${parts.join(' ')}`, offerPresent: info.offerPresent };
+}
+
+/* ---- Tree + snowman display ---- */
+const ORNAMENT_COLORS = ['#ff4d4d', '#ffd34d', '#4da6ff', '#ff8ad8', '#ffffff', '#7dffb0'];
+const ORNAMENT_SPOTS = (function(){
+  const spots = [];
+  const total = 60;
+  for(let k = 0; k < total; k++){
+    const t = (k + 0.5) / total;
+    const y = 30 + 120 * Math.sqrt(t);
+    const half = ((y - 8) / 150) * 62;
+    const f = (k * 0.6180339887) % 1;
+    spots.push({ x: 80 + (f * 2 - 1) * half * 0.88, y });
+  }
+  return spots;
+})();
+
+function treeSvg(count){
+  const shown = Math.min(count, ORNAMENT_SPOTS.length);
+  const orn = ORNAMENT_SPOTS.slice(0, shown).map((pt, i) =>
+    `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4" fill="${ORNAMENT_COLORS[i % ORNAMENT_COLORS.length]}" stroke="rgba(0,0,0,.35)" stroke-width=".8"></circle>`
+  ).join('');
+  return `<svg viewBox="0 -6 160 191" class="tree-svg" aria-hidden="true">` +
+    `<rect x="72" y="150" width="16" height="26" rx="2" fill="#6b4423"></rect>` +
+    `<polygon points="80,8 30,70 130,70" fill="#1f8a4c"></polygon>` +
+    `<polygon points="80,38 20,112 140,112" fill="#23995a"></polygon>` +
+    `<polygon points="80,72 10,156 150,156" fill="#1a7a42"></polygon>` +
+    orn +
+    `<polygon points="80,-4 84,6 95,6 86,13 90,24 80,17 70,24 74,13 65,6 76,6" fill="#f2b705"></polygon>` +
+    `</svg>`;
+}
+
+function editTreeCount(grade){
+  const tree = getTree(grade);
+  const val = prompt(`Set the number of ornaments on the ${grade} tree:`, String(tree.ornaments));
+  if(val === null) return;
+  const n = Math.max(0, Math.round(Number(val)));
+  if(Number.isNaN(n)) return;
+  tree.ornaments = n;
+  // Manual edits never pay out; they just mark which milestones are already reached
+  tree.unlocked = christmasSettings.milestones.filter(m => m.count <= n).map(m => m.count);
+  persist(true);
+  renderAll();
+}
+
+function renderTrees(){
+  const row = document.getElementById('treeRow');
+  const title = document.getElementById('treeTitle');
+  const spinner = getStudent(activeStudentId);
+  // Only the tree for the class that's spinning (the selected student's grade)
+  if(!spinner){
+    title.textContent = '🎄 Class Tree';
+    row.innerHTML = `<div class="empty-inv">Select a student to see their class tree.</div>`;
+    return;
+  }
+  title.textContent = `🎄 ${spinner.grade} Grade Class Tree`;
+  const ms = christmasSettings.milestones.slice().sort((a, b) => a.count - b.count);
+  row.innerHTML = [spinner.grade].map(g => {
+    const t = getTree(g);
+    const next = ms.find(m => m.count > t.ornaments);
+    const pct = next ? Math.min(100, Math.round((t.ornaments / next.count) * 100)) : 100;
+    const chips = ms.map(m => {
+      const done = t.ornaments >= m.count;
+      const what = rewardText(m.points, m.itemId);
+      const tip = `${what || 'No reward'} each${m.note ? ' — ' + m.note : ''}`;
+      return `<span class="tree-chip ${done ? 'done' : ''}" title="${escapeAttr(tip)}">${done ? '✓' : '🎁'} ${m.count}</span>`;
+    }).join('');
+    const nextWhat = next ? rewardText(next.points, next.itemId) : '';
+    return `
+      <div class="tree-card">
+        <div class="tree-title">${escapeHtml(g)} Grade <button class="tree-edit" data-grade="${escapeAttr(g)}" title="Set ornament count">✏️</button></div>
+        ${treeSvg(t.ornaments)}
+        <div class="tree-count">🎄 ${t.ornaments} ornament${t.ornaments === 1 ? '' : 's'}</div>
+        <div class="tree-progress"><div class="tree-progress-fill" style="width:${pct}%"></div></div>
+        <div class="tree-next">${next ? `Next at ${next.count}: ${escapeHtml(nextWhat || 'a surprise')} each${next.note ? ' · ' + escapeHtml(next.note) : ''}` : 'All milestones reached! 🌟'}</div>
+        <div class="tree-chips">${chips}</div>
+      </div>`;
+  }).join('');
+  row.querySelectorAll('.tree-edit').forEach(btn => {
+    btn.addEventListener('click', () => editTreeCount(btn.dataset.grade));
+  });
+}
+
+function renderSnowman(){
+  const card = document.getElementById('snowmanCard');
+  const s = getStudent(activeStudentId);
+  if(!s){
+    card.innerHTML = `<div class="empty-inv">Select a student to see their snowman.</div>`;
+    return;
+  }
+  xmasExtras(s);
+  const owned = ownedPieces(s);
+  const slots = snowmanPieces().map(p =>
+    `<div class="snow-slot ${owned.includes(p.id) ? 'have' : ''}" title="${escapeAttr(p.name)}"><span class="snow-emoji">${escapeHtml(p.emoji)}</span><span class="snow-name">${escapeHtml(p.name)}</span></div>`
+  ).join('');
+  const buffs = [];
+  if(s.buffs.double > 0) buffs.push(`<span class="buff-chip">✨ Elf Helper ×${s.buffs.double} (offered after a win)</span>`);
+  if(s.buffs.cocoa > 0) buffs.push(`<span class="buff-chip">☕ Hot Cocoa: ${s.buffs.cocoa} win${s.buffs.cocoa === 1 ? '' : 's'} left</span>`);
+  const reward = rewardText(christmasSettings.snowmanReward.points, christmasSettings.snowmanReward.itemId);
+  card.innerHTML = `
+    <div class="snowman-card">
+      <div class="snow-head">⛄ ${escapeHtml(s.name)}'s Snowman <span class="snow-built">${s.snowman.built} built</span></div>
+      <div class="snow-slots">${slots}</div>
+      <div class="snow-progress">${owned.length}/${snowmanPieces().length} pieces${reward ? ` — finish it for ${escapeHtml(reward)}!` : ''}</div>
+      <div class="buff-row">${buffs.join('') || '<span class="buff-none">No active buffs</span>'}</div>
+    </div>`;
+}
+
+function renderChristmas(){
+  renderNaughtyToggle();
+  const btn = document.getElementById('christmasToggleBtn');
+  btn.textContent = christmasMode ? '🎄 Christmas Mode: On' : '🎄 Christmas Mode: Off';
+  btn.classList.toggle('on', christmasMode);
+  document.getElementById('christmasSection').style.display = christmasMode ? '' : 'none';
+  if(!christmasMode) return;
+  renderTrees();
+  renderSnowman();
+}
+
+/* ---- Christmas settings: snowman reward + pieces, tree milestones (presents are on the Presents tab) ---- */
+function rewardItemOptions(selected){
+  const opts = [['', '— no item —'], ['CANDY', '🍬 Candy'], ['RANDOM', '🎲 Random shop item']].concat(items.filter(it => !it.hidden).map(it => [it.id, it.name]));
+  return opts.map(([v, l]) => `<option value="${escapeAttr(v)}" ${v === (selected || '') ? 'selected' : ''}>${escapeHtml(l)}</option>`).join('');
+}
+
+function renderChristmasSettings(){
+  const body = document.getElementById('christmasSettingsBody');
+  const cs = christmasSettings;
+  const pieceRows = cs.snowmanPieces.map((pc, i) => `
+    <div class="ms-row">
+      <input type="text" class="ms-emoji" data-xs="pieceEmoji" data-idx="${i}" value="${escapeAttr(pc.emoji)}" maxlength="6" title="Emoji">
+      <input type="text" class="ms-note" data-xs="pieceName" data-idx="${i}" value="${escapeAttr(pc.name)}" placeholder="piece name">
+      <button class="ms-remove" data-xs-remove="piece" data-idx="${i}" title="Remove piece" ${cs.snowmanPieces.length <= 1 ? 'disabled' : ''}>✕</button>
+    </div>`).join('');
+  const miracleShareNow = miracleShares().shares;
+  const MIRACLE_LABELS = { none: '🕯️ No miracle', present: '🎁 Open a present', cocoa: `☕ Hot Cocoa (+${COCOA_BONUS} for ${COCOA_CHARGES} wins)`, elf: '✨ Elf Helper (next prize ×2)' };
+  const miracleRows = MIRACLE_KEYS.map(k => `
+    <div class="odds-row">
+      <span class="odds-name">${MIRACLE_LABELS[k]}</span>
+      <input type="number" min="0" max="100" class="odds-input" data-xs="miracle" data-key="${k}" value="${cs.miracleOdds[k]}">
+      <span class="odds-pct">${Math.round(miracleShareNow[k])}%</span>
+    </div>`).join('');
+  const msRows = cs.milestones.map((m, i) => `
+    <div class="ms-block">
+      <div class="ms-row">
+        <input type="number" min="1" class="odds-input" data-xs="msCount" data-idx="${i}" value="${m.count}"> ornaments →
+        <input type="number" min="0" class="odds-input" data-xs="msPoints" data-idx="${i}" value="${m.points}"> pts
+        <select class="ms-select" data-xs="msItem" data-idx="${i}">${rewardItemOptions(m.itemId)}</select>
+        <button class="ms-remove" data-xs-remove="milestone" data-idx="${i}" title="Remove milestone" ${cs.milestones.length <= 1 ? 'disabled' : ''}>✕</button>
+      </div>
+      <input type="text" class="ms-note" data-xs="msNote" data-idx="${i}" value="${escapeAttr(m.note)}" placeholder="reward note for you to hand out (optional)">
+    </div>`).join('');
+  body.innerHTML = `
+    <div class="settings-sub">🎁 Presents</div>
+    <p class="modal-hint">What's inside the three presents is edited like the wheel prizes — its own points, items and odds.</p>
+    <button class="ms-add" id="editPresentsBtn">Edit present prizes →</button>
+
+    <div class="settings-sub">⛄ Snowman</div>
+    <div class="odds-row">
+      <span class="odds-name">Reward for a finished snowman</span>
+      <input type="number" min="0" class="odds-input" data-xs="snowPoints" value="${cs.snowmanReward.points}">
+      <span class="odds-pct">pts</span>
+    </div>
+    <div class="ms-row"><span>plus</span><select class="ms-select" data-xs="snowItem" style="max-width:none;flex:1;">${rewardItemOptions(cs.snowmanReward.itemId)}</select></div>
+    <p class="modal-hint">Snowman pieces (a student needs every piece to finish):</p>
+    ${pieceRows}
+    <button class="ms-add" data-xs-action="addPiece">+ Add piece</button>
+
+    <div class="settings-sub">🌟 Christmas Miracle</div>
+    <p class="modal-hint">Every finished snowman rolls for a Christmas Miracle. Numbers are relative — the % on the right is each outcome's real chance.</p>
+    ${miracleRows}
+
+    <div class="settings-sub">🎄 Class tree milestones</div>
+    <p class="modal-hint">When a grade's tree hits a milestone, every student in that grade gets the reward. The note is something for you to hand out.</p>
+    ${msRows}
+    <button class="ms-add" data-xs-action="addMilestone">+ Add milestone</button>`;
+
+  const refresh = () => { persist(); renderChristmasSettings(); renderAll(); };
+
+  body.querySelectorAll('[data-xs]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const el = e.target;
+      const kind = el.dataset.xs;
+      const idx = Number(el.dataset.idx);
+      if(kind === 'miracle') cs.miracleOdds[el.dataset.key] = Math.max(0, Math.min(100, Number(el.value) || 0));
+      else if(kind === 'snowPoints') cs.snowmanReward.points = Math.max(0, Math.round(Number(el.value) || 0));
+      else if(kind === 'snowItem') cs.snowmanReward.itemId = el.value || null;
+      else if(kind === 'pieceEmoji') cs.snowmanPieces[idx].emoji = Array.from(el.value.trim() || '⛄').slice(0, 3).join('');
+      else if(kind === 'pieceName') cs.snowmanPieces[idx].name = el.value.trim().slice(0, 30) || 'Piece';
+      else if(kind === 'msCount') cs.milestones[idx].count = Math.max(1, Math.round(Number(el.value) || 1));
+      else if(kind === 'msPoints') cs.milestones[idx].points = Math.max(0, Math.round(Number(el.value) || 0));
+      else if(kind === 'msItem') cs.milestones[idx].itemId = el.value || null;
+      else if(kind === 'msNote') cs.milestones[idx].note = el.value.trim();
+      refresh();
+    });
+  });
+  body.querySelectorAll('[data-xs-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.idx);
+      if(btn.dataset.xsRemove === 'piece' && cs.snowmanPieces.length > 1) cs.snowmanPieces.splice(idx, 1);
+      else if(btn.dataset.xsRemove === 'milestone' && cs.milestones.length > 1) cs.milestones.splice(idx, 1);
+      refresh();
+    });
+  });
+  body.querySelectorAll('[data-xs-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.dataset.xsAction === 'addPiece' && cs.snowmanPieces.length < 12){
+        cs.snowmanPieces.push({ id: uid(), emoji: '⭐', name: 'New piece' });
+      } else if(btn.dataset.xsAction === 'addMilestone' && cs.milestones.length < 12){
+        const top = cs.milestones.reduce((m, x) => Math.max(m, x.count), 0);
+        cs.milestones.push({ count: top + 25, points: 25, itemId: null, note: '' });
+      }
+      refresh();
+    });
+  });
+  document.getElementById('editPresentsBtn').addEventListener('click', () => {
+    document.getElementById('christmasSettingsModalOverlay').classList.remove('show');
+    setPrizeTab('presents');
+    if(!prizesEditMode) document.getElementById('prizesToggle').click();
+  });
+}
+document.getElementById('christmasSettingsBtn').addEventListener('click', () => {
+  renderChristmasSettings();
+  document.getElementById('christmasSettingsModalOverlay').classList.add('show');
+});
+document.getElementById('christmasSettingsCloseBtn').addEventListener('click', () => {
+  document.getElementById('christmasSettingsModalOverlay').classList.remove('show');
+});
+document.getElementById('christmasSettingsModalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'christmasSettingsModalOverlay') document.getElementById('christmasSettingsModalOverlay').classList.remove('show');
+});
+document.getElementById('presentsModalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'presentsModalOverlay' && presentsState && presentsState.picked !== null) closePresentsModal();
+});
+
+loadState();
+if(!halloweenInitialized){
+  getCandyItem();            // adds the 50-point Candy item once
+  halloweenInitialized = true;
+  persist();
+} else if(halloweenExtrasJustAdded){
+  persist();                 // save the newly added Halloween prizes
+}
+if(halloweenMode) activePrizeTab = 'halloween';
+else if(christmasMode) activePrizeTab = 'christmas';
+else if(naughtyMode) activePrizeTab = 'naughty';
+currentWheelPool = wheelPoolFor(activePrizeTab);
+document.getElementById('christmasWheelTabBtn').classList.toggle('active', activePrizeTab === 'christmas');
+document.getElementById('presentsTabBtn').classList.toggle('active', activePrizeTab === 'presents');
+document.getElementById('naughtyTabBtn').classList.toggle('active', activePrizeTab === 'naughty');
+document.getElementById('normalWheelTabBtn').classList.toggle('active', activePrizeTab === 'normal');
+document.getElementById('luckyWheelTabBtn').classList.toggle('active', activePrizeTab === 'lucky');
+document.getElementById('halloweenWheelTabBtn').classList.toggle('active', activePrizeTab === 'halloween');
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Exported backups may contain real student data
+*.json
+.DS_Store
+node_modules/
