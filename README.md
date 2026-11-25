@@ -210,11 +210,11 @@ A punishment wheel for serious misbehavior. **Every slice has the same chance.**
 
 ## 8. Random Student picker
 
-Click **🎲 Random Student**, choose a grade, and click **Roll**. It picks a student at random — great for "who answers next?".
+Click **🎲 Random Student** (it's on both the Store tab and the Prize Wheel tab), choose a grade, and click **Roll**. It picks a student at random — great for "who answers next?".
 
 - It **won't pick the same student twice** until everyone has been picked.
 - **Reset Session** starts over so everyone can be picked again.
-- **Select Student** makes the picked student the active one (for shopping or spinning).
+- **Select Student** makes the picked student the active one (for shopping or spinning). On the Prize Wheel tab, that means you can pick someone at random and spin for them right away.
 
 ---
 

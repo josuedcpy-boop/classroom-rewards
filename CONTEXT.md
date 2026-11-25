@@ -48,6 +48,7 @@ A separate Gradebook app (`classwork_evaluations.html`, per-grade evaluations wi
 
 ### 7. Random student picker
 - Picks a random student from a chosen grade; no repeats in a session, with a reset-session option.
+- Opened from both the Store toolbar (`randomStudentBtn`) and the Prize Wheel toolbar (`wheelRandomStudentBtn`); both call `openRandomModal()`.
 
 ### 8. Default example data (Nov 2026)
 - Fresh installs (no `pointStoreData_v2` in localStorage) start with one grade `Test` (shown as "Test Grade") and one student `Test Student` (100 points, selected), so a new teacher can try everything immediately. Defined by `DEFAULT_GRADES` and `DEFAULT_STUDENTS`. Saved or imported data is never touched; the old v1 migration still uses `DEFAULT_GRADES`.
